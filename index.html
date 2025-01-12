@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Natal Chart App</title>
 
-  <!-- Load AstroChart from your GitHub fork -->
-  <script src="https://<your-github-username>.github.io/AstroChart/dist/astrochart.min.js"></script>
+  <!-- Load AstroChart from your Hakaya fork -->
+  <script src="https://tsarinaha.github.io/Hakaya/dist/astrochart.min.js"></script>
 
   <style>
     body {
@@ -15,12 +15,15 @@
       background-color: #f4f4f9;
       padding: 20px;
     }
+
     h1 {
       color: #333;
     }
+
     form {
       margin: 20px 0;
     }
+
     input, button {
       padding: 10px;
       margin: 10px 0;
@@ -29,15 +32,18 @@
       border: 1px solid #ccc;
       border-radius: 5px;
     }
+
     button {
       background-color: #007bff;
       color: white;
       cursor: pointer;
       border: none;
     }
+
     button:hover {
       background-color: #0056b3;
     }
+
     #chart-container {
       margin: 20px auto;
       width: 600px;
@@ -75,7 +81,7 @@
       };
 
       try {
-        // POST the data to your API
+        // POST the data to your backend API
         const response = await fetch('https://astrologychartapi.onrender.com/calculate_chart/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -118,23 +124,3 @@
           600,
           600,
           {
-            planets: planetsData,
-            houses: data.cusps,
-            theme: {
-              planet: { color: 'blue' },
-              house: { borderColor: 'gray' },
-              aspect: { lineColor: 'red' },
-            },
-          }
-        );
-
-        // Draw the radix (base) chart
-        chart.radix();
-      } catch (error) {
-        console.error("Error rendering chart:", error);
-        alert(`Error rendering chart: ${error.message}`);
-      }
-    }
-  </script>
-</body>
-</html>
