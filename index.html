@@ -99,10 +99,10 @@
     // Function to render the natal chart using AstroChart
     function renderChart(data) {
       try {
-        console.log('API Response:', data);
+        console.log("API Response:", data);
 
         if (!data.planets || !data.cusps) {
-          throw new Error('Missing planets or cusps data in the API response.');
+          throw new Error("Missing planets or cusps data in the API response.");
         }
 
         // Prepare planets data for AstroChart
@@ -113,7 +113,7 @@
         }));
 
         // Create a new chart using AstroChart
-        const chart = new Chart(
+        const chart = new AstroChart.Chart(
           'chart-container',
           600,
           600,
@@ -128,10 +128,10 @@
           }
         );
 
-        // Draw the radix chart
+        // Draw the radix (base) chart
         chart.radix();
       } catch (error) {
-        console.error('Error rendering chart:', error);
+        console.error("Error rendering chart:", error);
         alert(`Error rendering chart: ${error.message}`);
       }
     }
