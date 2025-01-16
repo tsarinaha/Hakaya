@@ -5,12 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Natal Chart App</title>
 
-  <!-- Load astroChart from your fork -->
-  <script src="https://tsarinaha.github.io/Hakaya/dist/astrochart.js" defer></script>
-
-  <!-- Include CSS files -->
-  <link rel="stylesheet" href="dist/project/src/animation/animationStyles.css"> <!-- Animation styles -->
-  <link rel="stylesheet" href="dist/project/src/theme.css"> <!-- Theme styles -->
+  <!-- Load astroChart library -->
+  <script src="https://tsarinaha.github.io/Hakaya/dist/astrochart.js" defer></script> <!-- Ensure it's loaded before execution -->
 
   <style>
     body {
@@ -72,33 +68,21 @@
   <!-- Container for the natal chart -->
   <div id="chart-container"></div>
 
-  <!-- Include animation scripts -->
-  <script src="dist/project/src/animation/config.js"></script>
-  <script src="dist/project/src/animation/animationHandler.js"></script>
-  <script src="dist/project/src/animation/animationUtils.js"></script>
-
-  <!-- Include other source files -->
-  <script src="dist/project/src/astrochart.js"></script>
-  <script src="dist/project/src/helpers.js"></script>
-  <script src="dist/project/src/utils.js"></script>
-  <script src="dist/project/src/chartRenderer.js"></script>
-
+  <!-- App logic -->
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       // Ensure astrochart is available
-      const astro = window.astrochart || astrochart;
-      if (!astro) {
+      if (typeof astrochart === "undefined") {
         console.error("astrochart is not defined. Ensure the library is loaded correctly.");
         return;
       }
 
-      console.log("astrochart is available:", typeof astro);
+      console.log("astrochart is available:", typeof astrochart);
 
       // Listen for form submission
       document.getElementById('natal-chart-form').addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        // Collect user input
         const requestData = {
           name: document.getElementById('name').value,
           birth_date: document.getElementById('birth_date').value,
@@ -107,7 +91,6 @@
         };
 
         try {
-          // POST the data to your API
           const response = await fetch('https://astrologychartapi.onrender.com/calculate_chart/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -119,7 +102,6 @@
           if (data.error) {
             alert(`Error: ${data.error}`);
           } else {
-            // Render the chart with the received data
             renderChart(data);
           }
         } catch (error) {
@@ -128,12 +110,11 @@
         }
       });
 
-      // Function to render the natal chart using astrochart
+      // Function to render the natal chart
       function renderChart(data) {
         try {
           console.log("API Response:", data);
 
-          // Validate planets and cusps data
           if (!data.planets || !data.cusps) {
             throw new Error("Missing planets or cusps data in the API response.");
           }
@@ -150,12 +131,12 @@
           console.log("Cusps data for chart:", cuspsData);
 
           const container = document.getElementById("chart-container");
-          if (container.offsetWidth === 0 || container.offsetHeight === 0) {
-            throw new Error("Chart container has invalid dimensions. Please check CSS.");
+
+          if (!container) {
+            throw new Error("Chart container is missing.");
           }
 
-          console.log("Initializing astrochart.Chart...");
-          const chart = new astro.Chart(
+          const chart = new astrochart.Chart(
             'chart-container',
             600,
             600,
@@ -171,24 +152,11 @@
           );
 
           chart.radix();
-          console.log("Chart rendered successfully.");
         } catch (error) {
           console.error("Error rendering chart:", error.stack || error);
           alert(`Error rendering chart: ${error.message || error}`);
         }
       }
-
-      // Minimal chart test with static data
-      const sampleData = {
-        planets: [
-          { name: "Sun", longitude: 100, retrograde: false },
-          { name: "Moon", longitude: 200, retrograde: false },
-        ],
-        cusps: [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360],
-      };
-
-      console.log("Testing with static sample data...");
-      renderChart(sampleData);
     });
   </script>
 </body>
