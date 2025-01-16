@@ -7,6 +7,58 @@
 
   <!-- Load astroChart from your fork -->
 <script src="https://tsarinaha.github.io/Hakaya/dist/astrochart.js" defer></script>
+    <!-- Include CSS files -->
+  <link rel="stylesheet" href="dist/project/src/animation/animationStyles.css"> <!-- Example animation styles -->
+  <link rel="stylesheet" href="dist/project/src/theme.css"> <!-- Example theme styles -->
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f9;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    #chart-container {
+      margin: 20px auto;
+      width: 600px;
+      height: 600px;
+      border: 1px dashed red; /* For debugging visibility */
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Your Natal Chart with Animations</h1>
+
+  <!-- Container for the natal chart -->
+  <div id="chart-container"></div>
+
+  <!-- Include animation scripts -->
+  <script src="dist/project/src/animation/config.js"></script>
+  <script src="dist/project/src/animation/animationHandler.js"></script>
+  <script src="dist/project/src/animation/animationUtils.js"></script>
+
+  <!-- Include other source files -->
+  <script src="dist/project/src/astrochart.js"></script> <!-- Main astrochart script -->
+  <script src="dist/project/src/helpers.js"></script> <!-- Example helpers script -->
+  <script src="dist/project/src/utils.js"></script> <!-- Example utilities script -->
+  <script src="dist/project/src/chartRenderer.js"></script> <!-- Example chart rendering logic -->
+
+  <!-- App logic -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Ensure astrochart is available
+      if (typeof astrochart === "undefined") {
+        console.error("astrochart is not defined. Ensure the library is loaded correctly.");
+        return;
+      }
+
+      console.log("astrochart is available:", typeof astrochart);
 
   <style>
     body {
