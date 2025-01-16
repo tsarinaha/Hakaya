@@ -98,9 +98,9 @@
           renderChart(data);
         }
       } catch (error) {
-        console.error('Error fetching chart data:', error);
-        alert('Failed to fetch chart data. Please try again later.');
-      }
+  console.error("Error rendering chart:", error.stack || error);
+  alert(`Error rendering chart: ${error.message || error}`);
+}
     });
 
     // Function to render the natal chart using astrochart
