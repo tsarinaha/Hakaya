@@ -48,6 +48,7 @@
       margin: 20px auto;
       width: 600px;
       height: 600px;
+      border: 1px solid #ccc; /* For debugging visibility */
     }
   </style>
 </head>
@@ -107,8 +108,16 @@
       try {
         console.log("API Response:", data);
 
+        // Validate planets and cusps data
         if (!data.planets || !data.cusps) {
           throw new Error("Missing planets or cusps data in the API response.");
+        }
+        if (!data.planets.length || data.cusps.length !== 12) {
+          throw new Error(
+            `Invalid data: Planets array is ${
+              data.planets.length ? "valid" : "empty"
+            }, and cusps array length is ${data.cusps.length}.`
+          );
         }
 
         // Prepare planets data for astrochart
@@ -120,6 +129,15 @@
 
         console.log("Planets data:", planetsData);
         console.log("Cusps data:", data.cusps);
+
+        // Check chart container dimensions
+        const container = document.getElementById("chart-container");
+        console.log("Chart Container Exists:", !!container);
+        console.log("Chart Container Dimensions:", container.offsetWidth, container.offsetHeight);
+
+        if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+          throw new Error("Chart container has invalid dimensions. Please check CSS.");
+        }
 
         // Create a new chart using astrochart
         const chart = new astrochart.Chart(
