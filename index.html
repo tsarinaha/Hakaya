@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Natal Chart App</title>
 
-  <!-- Load AstroChart from your fork -->
+  <!-- Load astroChart from your fork -->
   <script src="https://tsarinaha.github.io/Hakaya/dist/astrochart.js"></script>
 
   <style>
@@ -102,7 +102,7 @@
       }
     });
 
-    // Function to render the natal chart using AstroChart
+    // Function to render the natal chart using astrochart
     function renderChart(data) {
       try {
         console.log("API Response:", data);
@@ -111,14 +111,14 @@
           throw new Error("Missing planets or cusps data in the API response.");
         }
 
-        // Prepare planets data for AstroChart
+        // Prepare planets data for astrochart
         const planetsData = data.planets.map((planet) => ({
           name: planet.name,
           longitude: planet.longitude,
           retrograde: false,
         }));
 
-        // Create a new chart using AstroChart
+        // Create a new chart using astrochart
         const chart = new astrochart.Chart(
           'chart-container',
           600,
