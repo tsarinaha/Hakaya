@@ -98,8 +98,8 @@
           renderChart(data);
         }
       } catch (error) {
-        console.error("Error rendering chart:", error.stack || error);
-        alert(`Error rendering chart: ${error.message || error}`);
+        console.error("Error fetching data from API:", error.stack || error);
+        alert(`Error fetching data: ${error.message || error}`);
       }
     });
 
@@ -112,15 +112,16 @@
         if (!data.planets || !data.cusps) {
           throw new Error("Missing planets or cusps data in the API response.");
         }
-        if (!data.planets.length || data.cusps.length !== 12) {
-          throw new Error(
-            `Invalid data: Planets array is ${
-              data.planets.length ? "valid" : "empty"
-            }, and cusps array length is ${data.cusps.length}.`
-          );
+        if (!Array.isArray(data.planets) || !data.planets.length) {
+          throw new Error("Planets data must be a non-empty array.");
+        }
+        if (!Array.isArray(data.cusps) || data.cusps.length !== 12) {
+          throw new Error("Cusps data must be an array with exactly 12 elements.");
         }
 
-        // Prepare planets data with safe defaults
+        console.log("Validated Planets:", data.planets);
+        console.log("Validated Cusps:", data.cusps);
+
         const planetsData = data.planets.map((planet) => ({
           name: planet.name || "Unknown",
           longitude: planet.longitude || 0,
@@ -158,8 +159,6 @@
           }
         );
 
-        // Draw the radix (base) chart
-        console.log("Calling chart.radix() to render the chart...");
         chart.radix();
         console.log("Chart rendered successfully.");
       } catch (error) {
@@ -169,29 +168,19 @@
     }
 
     // Minimal chart test with static data
-    const minimalData = {
+    const sampleData = {
       planets: [
-        { name: "Sun", longitude: 0 },
-        { name: "Moon", longitude: 90 },
+        { name: "Sun", longitude: 100, retrograde: false },
+        { name: "Moon", longitude: 200, retrograde: false },
       ],
-      cusps: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330],
+      cusps: [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360],
     };
 
+    console.log("Testing with static sample data...");
     try {
-      console.log("Testing minimal static data...");
-      const chart = new astrochart.Chart(
-        'chart-container',
-        600,
-        600,
-        {
-          planets: minimalData.planets,
-          houses: minimalData.cusps,
-        }
-      );
-      chart.radix();
-      console.log("Minimal chart rendered successfully.");
+      renderChart(sampleData);
     } catch (error) {
-      console.error("Error rendering minimal chart:", error.stack || error);
+      console.error("Error rendering static sample data:", error.stack || error);
     }
   </script>
 </body>
