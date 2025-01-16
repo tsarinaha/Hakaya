@@ -98,9 +98,9 @@
           renderChart(data);
         }
       } catch (error) {
-  console.error("Error rendering chart:", error.stack || error);
-  alert(`Error rendering chart: ${error.message || error}`);
-}
+        console.error("Error rendering chart:", error.stack || error);
+        alert(`Error rendering chart: ${error.message || error}`);
+      }
     });
 
     // Function to render the natal chart using astrochart
@@ -120,15 +120,17 @@
           );
         }
 
-        // Prepare planets data for astrochart
+        // Prepare planets data with safe defaults
         const planetsData = data.planets.map((planet) => ({
-          name: planet.name,
-          longitude: planet.longitude,
+          name: planet.name || "Unknown",
+          longitude: planet.longitude || 0,
           retrograde: planet.retrograde || false,
         }));
 
-        console.log("Planets data:", planetsData);
-        console.log("Cusps data:", data.cusps);
+        const cuspsData = data.cusps.slice(0, 12).map((cusp) => cusp || 0);
+
+        console.log("Planets data for chart:", planetsData);
+        console.log("Cusps data for chart:", cuspsData);
 
         // Check chart container dimensions
         const container = document.getElementById("chart-container");
@@ -140,13 +142,14 @@
         }
 
         // Create a new chart using astrochart
+        console.log("Initializing astrochart.Chart...");
         const chart = new astrochart.Chart(
           'chart-container',
           600,
           600,
           {
             planets: planetsData,
-            houses: data.cusps,
+            houses: cuspsData,
             theme: {
               planet: { color: 'blue' },
               house: { borderColor: 'gray' },
@@ -156,23 +159,40 @@
         );
 
         // Draw the radix (base) chart
+        console.log("Calling chart.radix() to render the chart...");
         chart.radix();
+        console.log("Chart rendered successfully.");
       } catch (error) {
-        console.error("Error rendering chart:", error);
-        alert(`Error rendering chart: ${error.message}`);
+        console.error("Error rendering chart:", error.stack || error);
+        alert(`Error rendering chart: ${error.message || error}`);
       }
     }
 
-    // Uncomment the following lines to test with static sample data
-    // const sampleData = {
-    //   planets: [
-    //     { name: "Sun", longitude: 100 },
-    //     { name: "Moon", longitude: 240 },
-    //     { name: "Mercury", longitude: 60 },
-    //   ],
-    //   cusps: [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360],
-    // };
-    // renderChart(sampleData);
+    // Minimal chart test with static data
+    const minimalData = {
+      planets: [
+        { name: "Sun", longitude: 0 },
+        { name: "Moon", longitude: 90 },
+      ],
+      cusps: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330],
+    };
+
+    try {
+      console.log("Testing minimal static data...");
+      const chart = new astrochart.Chart(
+        'chart-container',
+        600,
+        600,
+        {
+          planets: minimalData.planets,
+          houses: minimalData.cusps,
+        }
+      );
+      chart.radix();
+      console.log("Minimal chart rendered successfully.");
+    } catch (error) {
+      console.error("Error rendering minimal chart:", error.stack || error);
+    }
   </script>
 </body>
 </html>
