@@ -106,7 +106,13 @@
     // Function to render the natal chart using astrochart
     function renderChart(data) {
       try {
-        console.log("API Response:", data);
+        // Validate astrochart existence
+        const astro = window.astrochart || astrochart;
+        if (!astro) {
+          throw new ReferenceError("astrochart is not defined. Ensure the library is loaded.");
+        }
+
+        console.log("astrochart is available:", typeof astro);
 
         // Validate planets and cusps data
         if (!data.planets || !data.cusps) {
@@ -144,7 +150,7 @@
 
         // Create a new chart using astrochart
         console.log("Initializing astrochart.Chart...");
-        const chart = new astrochart.Chart(
+        const chart = new astro.Chart(
           'chart-container',
           600,
           600,
