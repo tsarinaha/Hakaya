@@ -115,8 +115,11 @@
         const planetsData = data.planets.map((planet) => ({
           name: planet.name,
           longitude: planet.longitude,
-          retrograde: false,
+          retrograde: planet.retrograde || false,
         }));
+
+        console.log("Planets data:", planetsData);
+        console.log("Cusps data:", data.cusps);
 
         // Create a new chart using astrochart
         const chart = new astrochart.Chart(
@@ -141,6 +144,17 @@
         alert(`Error rendering chart: ${error.message}`);
       }
     }
+
+    // Uncomment the following lines to test with static sample data
+    // const sampleData = {
+    //   planets: [
+    //     { name: "Sun", longitude: 100 },
+    //     { name: "Moon", longitude: 240 },
+    //     { name: "Mercury", longitude: 60 },
+    //   ],
+    //   cusps: [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360],
+    // };
+    // renderChart(sampleData);
   </script>
 </body>
 </html>
