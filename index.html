@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Natal Chart App</title>
 
-  <!-- Load astroChart library -->
+  <!-- Load AstroChart Library -->
   <script src="https://tsarinaha.github.io/Hakaya/dist/astrochart.js" defer></script>
+
+  <!-- Include Required CSS -->
+  <link rel="stylesheet" href="https://tsarinaha.github.io/Hakaya/dist/project/src/theme.css">
+  <link rel="stylesheet" href="https://tsarinaha.github.io/Hakaya/dist/project/src/animation/animationStyles.css">
 
   <style>
     body {
@@ -48,16 +52,14 @@
       margin: 20px auto;
       width: 600px;
       height: 600px;
-      border: 1px solid #ccc;
-      background-color: #fff;
+      border: 1px solid #ccc; /* For debugging visibility */
     }
   </style>
 </head>
-
 <body>
   <h1>Your Natal Chart</h1>
 
-  <!-- Form to input birth details -->
+  <!-- Form to Input Birth Details -->
   <form id="natal-chart-form">
     <input type="text" id="name" placeholder="Enter your name" required>
     <input type="date" id="birth_date" required>
@@ -66,162 +68,68 @@
     <button type="submit">Generate Chart</button>
   </form>
 
-  <!-- Chart Container -->
+  <!-- Container for Chart -->
   <div id="chart-container"></div>
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      // Ensure astrochart is available
+      // Ensure astrochart is loaded
       if (typeof window.astrochart === "undefined") {
-        console.warn("astrochart is not defined. Falling back to custom rendering logic.");
-      } else {
-        console.log("astrochart loaded successfully.");
+        console.error("astrochart is not defined. Ensure the library is loaded correctly.");
+        return;
       }
 
+      console.log("astrochart loaded successfully.");
+
       // Handle form submission
-      const form = document.getElementById("natal-chart-form");
-      form.addEventListener("submit", async function (e) {
+      const form = document.getElementById('natal-chart-form');
+      form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         const requestData = {
-          name: document.getElementById("name").value,
-          birth_date: document.getElementById("birth_date").value,
-          birth_time: document.getElementById("birth_time").value,
-          location: document.getElementById("location").value,
+          name: document.getElementById('name').value,
+          birth_date: document.getElementById('birth_date').value,
+          birth_time: document.getElementById('birth_time').value,
+          location: document.getElementById('location').value,
         };
 
-        console.log("Form submitted with data:", requestData);
-
         try {
-          // Fetch data from the API
-          const response = await fetch("https://astrologychartapi.onrender.com/calculate_chart/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+          const response = await fetch('https://astrologychartapi.onrender.com/calculate_chart/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData),
           });
 
           const data = await response.json();
-          console.log("API Response:", data);
 
           if (data.error) {
-            alert(`Error from API: ${data.error}`);
+            alert(`Error: ${data.error}`);
             return;
           }
 
-          // Validate the response
-          if (!Array.isArray(data.planets) || data.planets.length === 0 || data.cusps.length !== 12) {
-            throw new Error("Invalid data structure received from API.");
-          }
+          console.log("Data received from API:", data);
 
-          // Render the natal chart
-          renderChart(data);
+          // Render the chart
+          const chart = new astrochart.Chart('chart-container', 600, 600, {
+            planets: data.planets.map((planet) => ({
+              name: planet.name,
+              longitude: planet.longitude,
+              retrograde: planet.retrograde || false,
+            })),
+            houses: data.cusps,
+            theme: {
+              planet: { color: 'blue' },
+              house: { borderColor: 'gray' },
+              aspect: { lineColor: 'red' },
+            },
+          });
+
+          chart.radix();
+          console.log("Chart rendered successfully.");
         } catch (error) {
-          console.error("Error fetching or rendering data:", error.message);
-          alert(`Error: ${error.message}`);
+          console.error("Error fetching or rendering chart:", error.message);
         }
       });
-
-      // Custom chart rendering logic
-      function renderChartManually(containerId, planets, houses) {
-        const container = document.getElementById(containerId);
-        if (!container) {
-          console.error("Container not found:", containerId);
-          return;
-        }
-
-        // Clear the container
-        container.innerHTML = "";
-
-        // Create an SVG element
-        const width = 600;
-        const height = 600;
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("width", width);
-        svg.setAttribute("height", height);
-        svg.style.background = "#f4f4f9";
-
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const radius = Math.min(width, height) / 3;
-
-        // Draw the base circle (wheel)
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", centerX);
-        circle.setAttribute("cy", centerY);
-        circle.setAttribute("r", radius);
-        circle.setAttribute("stroke", "blue");
-        circle.setAttribute("fill", "none");
-        circle.setAttribute("stroke-width", 2);
-        svg.appendChild(circle);
-
-        // Render houses (cusps)
-        houses.forEach((cusp, index) => {
-          const angle = (cusp - 90) * (Math.PI / 180); // Offset by 90 degrees
-          const x = centerX + radius * Math.cos(angle);
-          const y = centerY + radius * Math.sin(angle);
-
-          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-          line.setAttribute("x1", centerX);
-          line.setAttribute("y1", centerY);
-          line.setAttribute("x2", x);
-          line.setAttribute("y2", y);
-          line.setAttribute("stroke", "gray");
-          line.setAttribute("stroke-width", 1);
-          svg.appendChild(line);
-        });
-
-        // Render planets
-        planets.forEach((planet) => {
-          const angle = (planet.longitude - 90) * (Math.PI / 180); // Offset by 90 degrees
-          const x = centerX + (radius - 20) * Math.cos(angle); // Slightly inside the circle
-          const y = centerY + (radius - 20) * Math.sin(angle);
-
-          const planetCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-          planetCircle.setAttribute("cx", x);
-          planetCircle.setAttribute("cy", y);
-          planetCircle.setAttribute("r", 5);
-          planetCircle.setAttribute("fill", "red");
-          svg.appendChild(planetCircle);
-
-          const planetText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          planetText.setAttribute("x", x + 10);
-          planetText.setAttribute("y", y + 5);
-          planetText.setAttribute("font-size", "10");
-          planetText.setAttribute("fill", "black");
-          planetText.textContent = planet.name;
-          svg.appendChild(planetText);
-        });
-
-        // Append the SVG to the container
-        container.appendChild(svg);
-        console.log("Chart rendered successfully with custom rendering logic.");
-      }
-
-      // Render the natal chart
-      function renderChart(data) {
-        try {
-          console.log("Rendering chart manually...");
-          renderChartManually("chart-container", data.planets, data.cusps);
-        } catch (error) {
-          console.error("Error rendering chart manually:", error.message);
-        }
-      }
-
-      // Minimal chart test with static data
-      const sampleData = {
-        planets: [
-          { name: "Sun", longitude: 100, retrograde: false },
-          { name: "Moon", longitude: 200, retrograde: false },
-        ],
-        cusps: [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360],
-      };
-
-      console.log("Testing with static sample data...");
-      try {
-        renderChart(sampleData);
-      } catch (error) {
-        console.error("Error rendering static sample data:", error.message);
-      }
     });
   </script>
 </body>
