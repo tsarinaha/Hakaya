@@ -73,10 +73,10 @@
     document.addEventListener("DOMContentLoaded", function () {
       // Ensure astrochart is available
       if (typeof window.astrochart === "undefined") {
-        console.error("astrochart is not defined. Ensure the library is loaded correctly.");
-        return;
+        console.warn("astrochart is not defined. Falling back to custom rendering logic.");
+      } else {
+        console.log("astrochart loaded successfully.");
       }
-      console.log("astrochart loaded successfully.");
 
       // Handle form submission
       const form = document.getElementById("natal-chart-form");
@@ -121,30 +121,89 @@
         }
       });
 
+      // Custom chart rendering logic
+      function renderChartManually(containerId, planets, houses) {
+        const container = document.getElementById(containerId);
+        if (!container) {
+          console.error("Container not found:", containerId);
+          return;
+        }
+
+        // Clear the container
+        container.innerHTML = "";
+
+        // Create an SVG element
+        const width = 600;
+        const height = 600;
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("width", width);
+        svg.setAttribute("height", height);
+        svg.style.background = "#f4f4f9";
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = Math.min(width, height) / 3;
+
+        // Draw the base circle (wheel)
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", centerX);
+        circle.setAttribute("cy", centerY);
+        circle.setAttribute("r", radius);
+        circle.setAttribute("stroke", "blue");
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke-width", 2);
+        svg.appendChild(circle);
+
+        // Render houses (cusps)
+        houses.forEach((cusp, index) => {
+          const angle = (cusp - 90) * (Math.PI / 180); // Offset by 90 degrees
+          const x = centerX + radius * Math.cos(angle);
+          const y = centerY + radius * Math.sin(angle);
+
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("x1", centerX);
+          line.setAttribute("y1", centerY);
+          line.setAttribute("x2", x);
+          line.setAttribute("y2", y);
+          line.setAttribute("stroke", "gray");
+          line.setAttribute("stroke-width", 1);
+          svg.appendChild(line);
+        });
+
+        // Render planets
+        planets.forEach((planet) => {
+          const angle = (planet.longitude - 90) * (Math.PI / 180); // Offset by 90 degrees
+          const x = centerX + (radius - 20) * Math.cos(angle); // Slightly inside the circle
+          const y = centerY + (radius - 20) * Math.sin(angle);
+
+          const planetCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          planetCircle.setAttribute("cx", x);
+          planetCircle.setAttribute("cy", y);
+          planetCircle.setAttribute("r", 5);
+          planetCircle.setAttribute("fill", "red");
+          svg.appendChild(planetCircle);
+
+          const planetText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          planetText.setAttribute("x", x + 10);
+          planetText.setAttribute("y", y + 5);
+          planetText.setAttribute("font-size", "10");
+          planetText.setAttribute("fill", "black");
+          planetText.textContent = planet.name;
+          svg.appendChild(planetText);
+        });
+
+        // Append the SVG to the container
+        container.appendChild(svg);
+        console.log("Chart rendered successfully with custom rendering logic.");
+      }
+
       // Render the natal chart
       function renderChart(data) {
         try {
-          const container = document.getElementById("chart-container");
-          console.log("Chart container dimensions:", container.offsetWidth, container.offsetHeight);
-
-          const chart = new astrochart.Chart("chart-container", 600, 600, {
-            planets: data.planets.map((planet) => ({
-              name: planet.name || "Unknown",
-              longitude: planet.longitude || 0,
-              retrograde: planet.retrograde || false,
-            })),
-            houses: data.cusps,
-            theme: {
-              planet: { color: "blue" },
-              house: { borderColor: "gray" },
-              aspect: { lineColor: "red" },
-            },
-          });
-
-          chart.radix();
-          console.log("Chart rendered successfully.");
+          console.log("Rendering chart manually...");
+          renderChartManually("chart-container", data.planets, data.cusps);
         } catch (error) {
-          console.error("Error rendering chart:", error.message);
+          console.error("Error rendering chart manually:", error.message);
         }
       }
 
