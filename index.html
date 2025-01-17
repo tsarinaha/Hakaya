@@ -6,7 +6,11 @@
   <title>Natal Chart App</title>
 
   <!-- Load astroChart library -->
-  <script src="https://tsarinaha.github.io/Hakaya/dist/astrochart.js" defer></script> <!-- Ensure it's loaded before execution -->
+  <script src="https://tsarinaha.github.io/Hakaya/dist/astrochart.js" defer></script>
+
+  <!-- Include CSS for themes and animations -->
+  <link rel="stylesheet" href="dist/project/src/animation/animationStyles.css">
+  <link rel="stylesheet" href="dist/project/src/theme.css">
 
   <style>
     body {
@@ -48,7 +52,7 @@
       margin: 20px auto;
       width: 600px;
       height: 600px;
-      border: 1px solid #ccc; /* For debugging visibility */
+      border: 1px solid #ccc;
     }
   </style>
 </head>
@@ -65,22 +69,21 @@
     <button type="submit">Generate Chart</button>
   </form>
 
-  <!-- Container for the natal chart -->
+  <!-- Chart Container -->
   <div id="chart-container"></div>
 
-  <!-- App logic -->
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       // Ensure astrochart is available
-      if (typeof astrochart === "undefined") {
+      if (typeof window.astrochart === "undefined") {
         console.error("astrochart is not defined. Ensure the library is loaded correctly.");
         return;
       }
+      console.log("astrochart loaded successfully.");
 
-      console.log("astrochart is available:", typeof astrochart);
-
-      // Listen for form submission
-      document.getElementById('natal-chart-form').addEventListener('submit', async function (e) {
+      // Form submission to fetch data
+      const form = document.getElementById('natal-chart-form');
+      form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         const requestData = {
@@ -101,60 +104,38 @@
 
           if (data.error) {
             alert(`Error: ${data.error}`);
-          } else {
-            renderChart(data);
+            return;
           }
+
+          // Render chart with the received data
+          renderChart(data);
         } catch (error) {
-          console.error("Error fetching data from API:", error.stack || error);
-          alert(`Error fetching data: ${error.message || error}`);
+          console.error("Error fetching data:", error.message);
         }
       });
 
-      // Function to render the natal chart
+      // Function to render the chart
       function renderChart(data) {
         try {
-          console.log("API Response:", data);
-
-          if (!data.planets || !data.cusps) {
-            throw new Error("Missing planets or cusps data in the API response.");
-          }
-
-          const planetsData = data.planets.map((planet) => ({
-            name: planet.name || "Unknown",
-            longitude: planet.longitude || 0,
-            retrograde: planet.retrograde || false,
-          }));
-
-          const cuspsData = data.cusps.slice(0, 12).map((cusp) => cusp || 0);
-
-          console.log("Planets data for chart:", planetsData);
-          console.log("Cusps data for chart:", cuspsData);
-
           const container = document.getElementById("chart-container");
-
-          if (!container) {
-            throw new Error("Chart container is missing.");
-          }
-
-          const chart = new astrochart.Chart(
-            'chart-container',
-            600,
-            600,
-            {
-              planets: planetsData,
-              houses: cuspsData,
-              theme: {
-                planet: { color: 'blue' },
-                house: { borderColor: 'gray' },
-                aspect: { lineColor: 'red' },
-              },
-            }
-          );
+          const chart = new astrochart.Chart("chart-container", 600, 600, {
+            planets: data.planets.map((planet) => ({
+              name: planet.name,
+              longitude: planet.longitude,
+              retrograde: planet.retrograde || false,
+            })),
+            houses: data.cusps,
+            theme: {
+              planet: { color: 'blue' },
+              house: { borderColor: 'gray' },
+              aspect: { lineColor: 'red' },
+            },
+          });
 
           chart.radix();
+          console.log("Chart rendered successfully!");
         } catch (error) {
-          console.error("Error rendering chart:", error.stack || error);
-          alert(`Error rendering chart: ${error.message || error}`);
+          console.error("Error rendering chart:", error.message);
         }
       }
     });
