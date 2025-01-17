@@ -8,10 +8,6 @@
   <!-- Load astroChart library -->
   <script src="https://tsarinaha.github.io/Hakaya/dist/astrochart.js" defer></script>
 
-  <!-- Include CSS for themes and animations -->
-  <link rel="stylesheet" href="dist/project/src/animation/animationStyles.css" onerror="console.error('animationStyles.css failed to load.')">
-  <link rel="stylesheet" href="dist/project/src/theme.css" onerror="console.error('theme.css failed to load.')">
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -22,30 +18,6 @@
 
     h1 {
       color: #333;
-    }
-
-    form {
-      margin: 20px 0;
-    }
-
-    input, button {
-      padding: 10px;
-      margin: 10px 0;
-      width: 300px;
-      max-width: 90%;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    button {
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-      border: none;
-    }
-
-    button:hover {
-      background-color: #0056b3;
     }
 
     #chart-container {
@@ -60,15 +32,6 @@
 <body>
   <h1>Your Natal Chart</h1>
 
-  <!-- Form to input birth details -->
-  <form id="natal-chart-form">
-    <input type="text" id="name" placeholder="Enter your name" required>
-    <input type="date" id="birth_date" required>
-    <input type="time" id="birth_time" required>
-    <input type="text" id="location" placeholder="Enter your birth location" required>
-    <button type="submit">Generate Chart</button>
-  </form>
-
   <!-- Chart Container -->
   <div id="chart-container"></div>
 
@@ -81,68 +44,30 @@
       }
       console.log("astrochart loaded successfully.");
 
-      // Form submission to fetch data
-      const form = document.getElementById('natal-chart-form');
-      form.addEventListener('submit', async function (e) {
-        e.preventDefault();
+      // Test with sample data
+      const sampleData = {
+          planets: [
+              { name: "Sun", longitude: 100, retrograde: false },
+              { name: "Moon", longitude: 200, retrograde: false },
+          ],
+          cusps: [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360],
+      };
 
-        const requestData = {
-          name: document.getElementById('name').value,
-          birth_date: document.getElementById('birth_date').value,
-          birth_time: document.getElementById('birth_time').value,
-          location: document.getElementById('location').value,
-        };
+      try {
+        const chart = new astrochart.Chart("chart-container", 600, 600, {
+          planets: sampleData.planets,
+          houses: sampleData.cusps,
+          theme: {
+            planet: { color: 'blue' },
+            house: { borderColor: 'gray' },
+            aspect: { lineColor: 'red' },
+          },
+        });
 
-        try {
-          const response = await fetch('https://astrologychartapi.onrender.com/calculate_chart/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestData),
-          });
-
-          const data = await response.json();
-
-          if (data.error) {
-            alert(`Error: ${data.error}`);
-            return;
-          }
-
-          // Render chart with the received data
-          renderChart(data);
-        } catch (error) {
-          console.error("Error fetching data:", error.message);
-        }
-      });
-
-      // Function to render the chart
-      function renderChart(data) {
-        try {
-          const container = document.getElementById("chart-container");
-          console.log("Chart container dimensions:", container.offsetWidth, container.offsetHeight);
-
-          if (!data.planets || !data.cusps) {
-            throw new Error("Missing planets or cusps data.");
-          }
-
-          const chart = new astrochart.Chart("chart-container", 600, 600, {
-            planets: data.planets.map((planet) => ({
-              name: planet.name,
-              longitude: planet.longitude,
-              retrograde: planet.retrograde || false,
-            })),
-            houses: data.cusps,
-            theme: {
-              planet: { color: 'blue' },
-              house: { borderColor: 'gray' },
-              aspect: { lineColor: 'red' },
-            },
-          });
-
-          chart.radix();
-          console.log("Chart rendered successfully.");
-        } catch (error) {
-          console.error("Error rendering chart:", error.message);
-        }
+        chart.radix();
+        console.log("Chart rendered successfully.");
+      } catch (error) {
+        console.error("Error rendering chart:", error.message);
       }
     });
   </script>
