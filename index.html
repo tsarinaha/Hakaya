@@ -9,8 +9,8 @@
   <script src="https://tsarinaha.github.io/Hakaya/dist/astrochart.js" defer></script>
 
   <!-- Include CSS for themes and animations -->
-  <link rel="stylesheet" href="dist/project/src/animation/animationStyles.css">
-  <link rel="stylesheet" href="dist/project/src/theme.css">
+  <link rel="stylesheet" href="dist/project/src/animation/animationStyles.css" onerror="console.error('animationStyles.css failed to load.')">
+  <link rel="stylesheet" href="dist/project/src/theme.css" onerror="console.error('theme.css failed to load.')">
 
   <style>
     body {
@@ -118,6 +118,12 @@
       function renderChart(data) {
         try {
           const container = document.getElementById("chart-container");
+          console.log("Chart container dimensions:", container.offsetWidth, container.offsetHeight);
+
+          if (!data.planets || !data.cusps) {
+            throw new Error("Missing planets or cusps data.");
+          }
+
           const chart = new astrochart.Chart("chart-container", 600, 600, {
             planets: data.planets.map((planet) => ({
               name: planet.name,
@@ -133,7 +139,7 @@
           });
 
           chart.radix();
-          console.log("Chart rendered successfully!");
+          console.log("Chart rendered successfully.");
         } catch (error) {
           console.error("Error rendering chart:", error.message);
         }
