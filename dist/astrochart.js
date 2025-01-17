@@ -9,6 +9,8 @@
 }(typeof self !== "undefined" ? self : this, function() {
     "use strict";
 
+    window.astrochart = astrochart;
+
     // All the library code here
     const astrochart = {
         Chart: function(containerId, width, height, options) {
