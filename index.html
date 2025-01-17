@@ -71,7 +71,7 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      // Check if astrochart is available
+      // Ensure astrochart is available
       if (typeof window.astrochart === "undefined") {
         console.error("astrochart is not defined. Ensure the library is loaded correctly.");
         return;
@@ -129,8 +129,8 @@
 
           const chart = new astrochart.Chart("chart-container", 600, 600, {
             planets: data.planets.map((planet) => ({
-              name: planet.name,
-              longitude: planet.longitude,
+              name: planet.name || "Unknown",
+              longitude: planet.longitude || 0,
               retrograde: planet.retrograde || false,
             })),
             houses: data.cusps,
@@ -146,6 +146,22 @@
         } catch (error) {
           console.error("Error rendering chart:", error.message);
         }
+      }
+
+      // Minimal chart test with static data
+      const sampleData = {
+        planets: [
+          { name: "Sun", longitude: 100, retrograde: false },
+          { name: "Moon", longitude: 200, retrograde: false },
+        ],
+        cusps: [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360],
+      };
+
+      console.log("Testing with static sample data...");
+      try {
+        renderChart(sampleData);
+      } catch (error) {
+        console.error("Error rendering static sample data:", error.message);
       }
     });
   </script>
