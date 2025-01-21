@@ -77,11 +77,12 @@
                 }
 
                 const apiData = await response.json();
-                console.log("API Response:", apiData);
+                console.log("Raw API Response:", apiData);
 
                 // Map API data to AstroChart format
                 const chartData = mapApiData(apiData);
-                console.log("Mapped Data for Chart:", chartData);
+                console.log("Sanitized Planets Data:", chartData.planets);
+                console.log("Sanitized Cusps Data:", chartData.cusps);
 
                 const chart = new astrochart.Chart("chartContainer", 800, 800);
 
@@ -103,16 +104,23 @@
 
         // Function to map API response to AstroChart format
         function mapApiData(apiData) {
-            // Ensure planets are arrays
+            // Ensure planets are arrays with valid numbers
             const mappedPlanets = {};
             for (const [planet, value] of Object.entries(apiData.planets)) {
-                mappedPlanets[planet] = Array.isArray(value) ? value : [value]; // Wrap single values in an array
+                if (Array.isArray(value) && !isNaN(value[0])) {
+                    mappedPlanets[planet] = value; // Valid array
+                } else if (!isNaN(value)) {
+                    mappedPlanets[planet] = [value]; // Wrap single valid number in an array
+                } else {
+                    console.warn(`Invalid value for planet ${planet}:`, value);
+                    mappedPlanets[planet] = [0]; // Default to 0 degrees if invalid
+                }
             }
 
             return {
                 planets: mappedPlanets, // Correctly formatted planets
-                cusps: apiData.cusps, // Pass house cusps as-is
-                aspects: apiData.aspects || [], // Pass aspects as-is or empty array
+                cusps: apiData.cusps || [], // Pass house cusps or default to an empty array
+                aspects: apiData.aspects || [], // Pass aspects or default to an empty array
             };
         }
     </script>
