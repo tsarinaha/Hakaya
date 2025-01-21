@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Astrology Chart with Debugging</title>
+    <title>Astrology Chart with Custom Aspects</title>
     <script src="https://unpkg.com/@astrodraw/astrochart"></script>
     <style>
         #chartContainer {
             width: 800px;
             height: 800px;
-            border: 1px solid black;
             margin: auto;
+            border: 1px solid black;
         }
         h1 {
             text-align: center;
@@ -43,18 +43,34 @@
                 ],
             };
 
-            console.log("Static Data:", staticData);
-
             const chart = new astrochart.Chart("chartContainer", 800, 800);
 
-            // Render chart
-            try {
-                chart.radix(staticData);
-                console.log("Chart rendered successfully!");
-            } catch (error) {
-                console.error("Error rendering chart:", error);
-            }
+            // Render the radix chart
+            chart.radix(staticData);
+
+            // Custom logic to draw aspects
+            const svg = document.querySelector("#chartContainer svg");
+            renderAspects(svg, staticData.planets, staticData.aspects);
         });
+
+        function renderAspects(svg, planets, aspects) {
+            aspects.forEach((aspect) => {
+                const fromPlanet = planets[aspect.from];
+                const toPlanet = planets[aspect.to];
+
+                if (fromPlanet && toPlanet) {
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", fromPlanet[0]); // Use longitude to calculate positions
+                    line.setAttribute("y1", fromPlanet[0]); // Adjust accordingly
+                    line.setAttribute("x2", toPlanet[0]);
+                    line.setAttribute("y2", toPlanet[0]);
+                    line.setAttribute("stroke", "blue");
+                    line.setAttribute("stroke-width", "2");
+
+                    svg.appendChild(line);
+                }
+            });
+        }
     </script>
 </body>
 </html>
