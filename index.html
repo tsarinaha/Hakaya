@@ -55,7 +55,6 @@
             const chartContainer = document.getElementById("chartContainer");
 
             try {
-                // Construct the request payload matching the API format
                 const requestData = {
                     name: name,
                     birth_date: birthDate,
@@ -65,7 +64,6 @@
 
                 console.log("Request Data (sent to API):", JSON.stringify(requestData));
 
-                // Fetch data from API
                 const response = await fetch(apiUrl, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -105,10 +103,16 @@
 
         // Function to map API response to AstroChart format
         function mapApiData(apiData) {
+            // Ensure planets are arrays
+            const mappedPlanets = {};
+            for (const [planet, value] of Object.entries(apiData.planets)) {
+                mappedPlanets[planet] = Array.isArray(value) ? value : [value]; // Wrap single values in an array
+            }
+
             return {
-                planets: apiData.planets,
-                cusps: apiData.cusps,
-                aspects: apiData.aspects || [],
+                planets: mappedPlanets, // Correctly formatted planets
+                cusps: apiData.cusps, // Pass house cusps as-is
+                aspects: apiData.aspects || [], // Pass aspects as-is or empty array
             };
         }
     </script>
