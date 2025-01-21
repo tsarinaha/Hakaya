@@ -54,18 +54,31 @@
         });
 
         function renderAspects(svg, planets, aspects) {
+            const centerX = 400; // Center of the chart
+            const centerY = 400; // Center of the chart
+            const radius = 350;  // Radius for planets
+
             aspects.forEach((aspect) => {
                 const fromPlanet = planets[aspect.from];
                 const toPlanet = planets[aspect.to];
 
                 if (fromPlanet && toPlanet) {
+                    const fromAngle = (fromPlanet[0] * Math.PI) / 180; // Convert degrees to radians
+                    const toAngle = (toPlanet[0] * Math.PI) / 180;
+
+                    const fromX = centerX + radius * Math.cos(fromAngle);
+                    const fromY = centerY - radius * Math.sin(fromAngle);
+
+                    const toX = centerX + radius * Math.cos(toAngle);
+                    const toY = centerY - radius * Math.sin(toAngle);
+
                     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", fromPlanet[0]); // Use longitude to calculate positions
-                    line.setAttribute("y1", fromPlanet[0]); // Adjust accordingly
-                    line.setAttribute("x2", toPlanet[0]);
-                    line.setAttribute("y2", toPlanet[0]);
+                    line.setAttribute("x1", fromX);
+                    line.setAttribute("y1", fromY);
+                    line.setAttribute("x2", toX);
+                    line.setAttribute("y2", toY);
                     line.setAttribute("stroke", "blue");
-                    line.setAttribute("stroke-width", "2");
+                    line.setAttribute("stroke-width", "1.5");
 
                     svg.appendChild(line);
                 }
