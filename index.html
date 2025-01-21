@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Astrology Chart with Correct Aspects</title>
+    <title>Astrology Chart with API Integration</title>
     <script src="https://unpkg.com/@astrodraw/astrochart"></script>
     <style>
         #chartContainer {
@@ -15,70 +15,54 @@
         h1 {
             text-align: center;
         }
+        #errorMessage {
+            color: red;
+            text-align: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <h1>Astrology Chart</h1>
     <div id="chartContainer"></div>
+    <div id="errorMessage" style="display: none;">Failed to load chart data.</div>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const staticData = {
-                planets: {
-                    Sun: [15],
-                    Moon: [45],
-                    Mercury: [75],
-                    Venus: [105],
-                    Mars: [135],
-                    Jupiter: [165],
-                    Saturn: [195],
-                    Uranus: [225],
-                    Neptune: [255],
-                    Pluto: [285],
-                },
-                cusps: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330],
-                aspects: [
-                    { from: "Sun", to: "Moon", type: "sextile" },
-                    { from: "Sun", to: "Mars", type: "trine" },
-                    { from: "Venus", to: "Saturn", type: "square" },
-                ],
-            };
+        document.addEventListener("DOMContentLoaded", async function () {
+            const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart"; // Replace with your API endpoint
+            const errorMessage = document.getElementById("errorMessage");
 
-            const chart = new astrochart.Chart("chartContainer", 800, 800);
+            try {
+                // Fetch data from the API
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
-            // Render the radix chart
-            chart.radix(staticData);
+                const apiData = await response.json();
 
-            // Custom logic to draw aspects
-            const svg = document.querySelector("#chartContainer svg");
-            renderAspects(svg, staticData.aspects);
+                // Map API data to AstroChart format
+                const chartData = mapApiData(apiData);
+
+                // Initialize the chart
+                const chart = new astrochart.Chart("chartContainer", 800, 800);
+
+                // Render the chart
+                chart.radix(chartData);
+
+                console.log("Astrology chart rendered successfully!");
+            } catch (error) {
+                console.error("Error fetching or rendering chart data:", error);
+                errorMessage.style.display = "block";
+            }
         });
 
-        function renderAspects(svg, aspects) {
-            aspects.forEach((aspect) => {
-                // Get the actual planet elements from the SVG
-                const fromPlanetElement = svg.querySelector(`[data-planet="${aspect.from}"]`);
-                const toPlanetElement = svg.querySelector(`[data-planet="${aspect.to}"]`);
-
-                if (fromPlanetElement && toPlanetElement) {
-                    // Retrieve the x, y coordinates of the planets
-                    const fromX = parseFloat(fromPlanetElement.getAttribute("cx"));
-                    const fromY = parseFloat(fromPlanetElement.getAttribute("cy"));
-                    const toX = parseFloat(toPlanetElement.getAttribute("cx"));
-                    const toY = parseFloat(toPlanetElement.getAttribute("cy"));
-
-                    // Draw the aspect line
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", fromX);
-                    line.setAttribute("y1", fromY);
-                    line.setAttribute("x2", toX);
-                    line.setAttribute("y2", toY);
-                    line.setAttribute("stroke", "blue");
-                    line.setAttribute("stroke-width", "1.5");
-                    line.setAttribute("stroke-dasharray", "4"); // Optional: dashed line for aspects
-
-                    svg.appendChild(line);
-                }
-            });
+        // Function to map API response to AstroChart format
+        function mapApiData(apiData) {
+            return {
+                planets: apiData.planets, // Ensure API provides planets in this format
+                cusps: apiData.cusps, // Ensure API provides house cusps
+                aspects: apiData.aspects || [], // Optional: Include aspects if available
+            };
         }
     </script>
 </body>
