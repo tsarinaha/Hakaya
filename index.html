@@ -3,41 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Astrology Chart Test</title>
-    <script src="dist/astrochart.js"></script>
+    <title>Astrology Chart Example</title>
+    <script src="https://unpkg.com/@astrodraw/astrochart"></script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
         #chartContainer {
             width: 800px;
             height: 800px;
+            margin: 20px auto;
             border: 1px solid black;
-            margin: auto;
         }
     </style>
 </head>
 <body>
-    <h1 style="text-align: center;">Astrology Chart</h1>
+    <h1>Astrology Chart</h1>
     <div id="chartContainer"></div>
     <script>
-        window.onload = function () {
+        // Wait until the DOM is fully loaded
+        document.addEventListener("DOMContentLoaded", function () {
             try {
+                // Sample data for planets and cusps
                 const data = {
                     planets: {
-                        Sun: [15],      // 15° Aries
-                        Moon: [45],     // 15° Taurus
-                        Mercury: [75],  // 15° Gemini
-                        Venus: [105],   // 15° Cancer
+                        Sun: [15],       // Sun at 15° Aries
+                        Moon: [45],      // Moon at 15° Taurus
+                        Mercury: [75],   // Mercury at 15° Gemini
+                        Venus: [105],    // Venus at 15° Cancer
+                        Mars: [135],     // Mars at 15° Leo
+                        Jupiter: [165],  // Jupiter at 15° Virgo
+                        Saturn: [195],   // Saturn at 15° Libra
+                        Uranus: [225],   // Uranus at 15° Scorpio
+                        Neptune: [255],  // Neptune at 15° Sagittarius
+                        Pluto: [285],    // Pluto at 15° Capricorn
                     },
                     cusps: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330],
                 };
 
-                const chart = new astrology.Chart('chartContainer', 800, 800);
+                // Initialize the chart
+                const chart = new astrochart.Chart('chartContainer', 800, 800);
+
+                // Render the radix chart with the sample data
                 chart.radix(data);
 
-                console.log("Chart rendered successfully!");
+                console.log("Astrology chart rendered successfully!");
             } catch (error) {
-                console.error("Error rendering chart:", error);
+                console.error("Error rendering astrology chart:", error);
             }
-        };
+        });
     </script>
 </body>
 </html>
