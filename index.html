@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Astrology Chart with Custom Aspects</title>
+    <title>Astrology Chart with Correct Aspects</title>
     <script src="https://unpkg.com/@astrodraw/astrochart"></script>
     <style>
         #chartContainer {
@@ -50,28 +50,23 @@
 
             // Custom logic to draw aspects
             const svg = document.querySelector("#chartContainer svg");
-            renderAspects(svg, staticData.planets, staticData.aspects);
+            renderAspects(svg, staticData.aspects);
         });
 
-        function renderAspects(svg, planets, aspects) {
-            const centerX = 400; // Center of the chart
-            const centerY = 400; // Center of the chart
-            const radius = 350;  // Radius for planets
-
+        function renderAspects(svg, aspects) {
             aspects.forEach((aspect) => {
-                const fromPlanet = planets[aspect.from];
-                const toPlanet = planets[aspect.to];
+                // Get the actual planet elements from the SVG
+                const fromPlanetElement = svg.querySelector(`[data-planet="${aspect.from}"]`);
+                const toPlanetElement = svg.querySelector(`[data-planet="${aspect.to}"]`);
 
-                if (fromPlanet && toPlanet) {
-                    const fromAngle = (fromPlanet[0] * Math.PI) / 180; // Convert degrees to radians
-                    const toAngle = (toPlanet[0] * Math.PI) / 180;
+                if (fromPlanetElement && toPlanetElement) {
+                    // Retrieve the x, y coordinates of the planets
+                    const fromX = parseFloat(fromPlanetElement.getAttribute("cx"));
+                    const fromY = parseFloat(fromPlanetElement.getAttribute("cy"));
+                    const toX = parseFloat(toPlanetElement.getAttribute("cx"));
+                    const toY = parseFloat(toPlanetElement.getAttribute("cy"));
 
-                    const fromX = centerX + radius * Math.cos(fromAngle);
-                    const fromY = centerY - radius * Math.sin(fromAngle);
-
-                    const toX = centerX + radius * Math.cos(toAngle);
-                    const toY = centerY - radius * Math.sin(toAngle);
-
+                    // Draw the aspect line
                     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
                     line.setAttribute("x1", fromX);
                     line.setAttribute("y1", fromY);
@@ -79,6 +74,7 @@
                     line.setAttribute("y2", toY);
                     line.setAttribute("stroke", "blue");
                     line.setAttribute("stroke-width", "1.5");
+                    line.setAttribute("stroke-dasharray", "4"); // Optional: dashed line for aspects
 
                     svg.appendChild(line);
                 }
