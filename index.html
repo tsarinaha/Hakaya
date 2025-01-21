@@ -35,7 +35,7 @@
     <form id="chartForm">
         <input type="date" id="birthDate" required>
         <input type="time" id="birthTime" required>
-        <input type="text" id="location" placeholder="Location" required>
+        <input type="text" id="location" placeholder="Location (City, Country)" required>
         <button type="submit">Generate Chart</button>
     </form>
     <div id="errorMessage" style="display: none;">Failed to load chart data. Please check your input.</div>
@@ -44,29 +44,27 @@
         document.getElementById("chartForm").addEventListener("submit", async function (event) {
             event.preventDefault();
 
-            // Collect user input
             const birthDate = document.getElementById("birthDate").value;
             const birthTime = document.getElementById("birthTime").value;
             const location = document.getElementById("location").value;
 
-            const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
+            const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart"; // Replace with your API endpoint
             const errorMessage = document.getElementById("errorMessage");
             const chartContainer = document.getElementById("chartContainer");
 
             try {
-                // Construct the API request payload
                 const requestData = {
                     birthDate: birthDate,
                     birthTime: birthTime,
                     location: location,
                 };
 
-                // Fetch data from the API
+                console.log("Request Data:", requestData);
+
+                // Fetch data from API
                 const response = await fetch(apiUrl, {
-                    method: "POST", // Use POST for sending input data
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(requestData),
                 });
 
@@ -75,22 +73,26 @@
                 }
 
                 const apiData = await response.json();
+                console.log("API Response:", apiData);
 
                 // Map API data to AstroChart format
                 const chartData = mapApiData(apiData);
+                console.log("Mapped Data for Chart:", chartData);
 
-                // Initialize the chart
                 const chart = new astrochart.Chart("chartContainer", 800, 800);
+
+                // Expose chart instance globally for debugging
+                window.chart = chart;
+                console.log("Chart Instance (Global):", window.chart);
 
                 // Render the chart
                 chart.radix(chartData);
 
                 // Show the chart container
                 chartContainer.style.display = "block";
-
-                console.log("Astrology chart rendered successfully!");
+                console.log("Chart rendered successfully!");
             } catch (error) {
-                console.error("Error fetching or rendering chart data:", error);
+                console.error("Error:", error);
                 errorMessage.style.display = "block";
             }
         });
