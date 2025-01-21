@@ -82,7 +82,6 @@
                 // Map API data to AstroChart format
                 const chartData = mapApiData(apiData);
                 console.log("Sanitized Planets Data:", chartData.planets);
-                console.log("Sanitized Cusps Data:", chartData.cusps);
 
                 const chart = new astrochart.Chart("chartContainer", 800, 800);
 
@@ -104,23 +103,35 @@
 
         // Function to map API response to AstroChart format
         function mapApiData(apiData) {
-            // Ensure planets are arrays with valid numbers
+            // Arabic-to-English mapping
+            const planetNameMapping = {
+                "الشمس": "Sun",
+                "القمر": "Moon",
+                "عطارد": "Mercury",
+                "الزهرة": "Venus",
+                "المريخ": "Mars",
+                "المشتري": "Jupiter",
+                "زحل": "Saturn",
+                "أورانوس": "Uranus",
+                "نبتون": "Neptune",
+                "بلوتو": "Pluto",
+            };
+
+            // Ensure planets are arrays with valid names
             const mappedPlanets = {};
-            for (const [planet, value] of Object.entries(apiData.planets)) {
-                if (Array.isArray(value) && !isNaN(value[0])) {
-                    mappedPlanets[planet] = value; // Valid array
-                } else if (!isNaN(value)) {
-                    mappedPlanets[planet] = [value]; // Wrap single valid number in an array
+            for (const [arabicName, planetData] of Object.entries(apiData.planets)) {
+                const englishName = planetNameMapping[arabicName];
+                if (englishName && planetData && !isNaN(planetData.longitude)) {
+                    mappedPlanets[englishName] = [planetData.longitude]; // Map longitude to array
                 } else {
-                    console.warn(`Invalid value for planet ${planet}:`, value);
-                    mappedPlanets[planet] = [0]; // Default to 0 degrees if invalid
+                    console.warn(`Invalid value for planet ${arabicName}:`, planetData);
                 }
             }
 
             return {
                 planets: mappedPlanets, // Correctly formatted planets
-                cusps: apiData.cusps || [], // Pass house cusps or default to an empty array
-                aspects: apiData.aspects || [], // Pass aspects or default to an empty array
+                cusps: apiData.cusps || [], // Pass house cusps or default to empty array
+                aspects: apiData.aspects || [], // Pass aspects or default to empty array
             };
         }
     </script>
