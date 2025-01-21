@@ -63,16 +63,16 @@
           }
 
           // Initialize and render the chart
-          const chart = new astrochart.Chart('chart-container', 600, 600, {
-            planets: data.planets,
-            houses: data.houses,
-            theme: {
-              planet: { color: 'blue' },
-              house: { borderColor: 'gray' },
-              aspect: { lineColor: 'red' },
-            },
-          });
-
+        const chart = new astrochart.Chart('chart-container', 600, 600);
+chart.radix({
+  planets: data.planets,
+  houses: data.houses,
+  theme: {
+    planet: { color: 'blue' },
+    house: { borderColor: 'gray' },
+    aspect: { lineColor: 'red' },
+  },
+});
           chart.radix();
         } catch (err) {
           console.error("Error fetching or rendering chart:", err.message);
