@@ -57,10 +57,10 @@
             try {
                 // Construct the request payload matching the API format
                 const requestData = {
-                    name: name, // Full name of the user
-                    birth_date: birthDate, // Date of birth in "YYYY-MM-DD" format
-                    birth_time: birthTime, // Time of birth in "HH:MM" format
-                    location: location, // Location in "City, Country" format
+                    name: name,
+                    birth_date: birthDate,
+                    birth_time: birthTime,
+                    location: location,
                 };
 
                 console.log("Request Data (sent to API):", JSON.stringify(requestData));
@@ -106,9 +106,9 @@
         // Function to map API response to AstroChart format
         function mapApiData(apiData) {
             return {
-                planets: apiData.planets, // Ensure API provides planets in this format
-                cusps: apiData.cusps, // Ensure API provides house cusps
-                aspects: apiData.aspects || [], // Optional: Include aspects if available
+                planets: apiData.planets,
+                cusps: apiData.cusps,
+                aspects: apiData.aspects || [],
             };
         }
     </script>
