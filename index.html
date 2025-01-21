@@ -3,17 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Astrology Chart with API Integration</title>
+    <title>Interactive Astrology Chart</title>
     <script src="https://unpkg.com/@astrodraw/astrochart"></script>
     <style>
         #chartContainer {
             width: 800px;
             height: 800px;
-            margin: auto;
+            margin: 20px auto;
             border: 1px solid black;
+            display: none; /* Hidden initially */
         }
         h1 {
             text-align: center;
+        }
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input, button {
+            margin: 5px;
         }
         #errorMessage {
             color: red;
@@ -23,17 +31,45 @@
     </style>
 </head>
 <body>
-    <h1>Astrology Chart</h1>
+    <h1>Interactive Astrology Chart</h1>
+    <form id="chartForm">
+        <input type="date" id="birthDate" required>
+        <input type="time" id="birthTime" required>
+        <input type="text" id="location" placeholder="Location" required>
+        <button type="submit">Generate Chart</button>
+    </form>
+    <div id="errorMessage" style="display: none;">Failed to load chart data. Please check your input.</div>
     <div id="chartContainer"></div>
-    <div id="errorMessage" style="display: none;">Failed to load chart data.</div>
     <script>
-        document.addEventListener("DOMContentLoaded", async function () {
+        document.getElementById("chartForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            // Collect user input
+            const birthDate = document.getElementById("birthDate").value;
+            const birthTime = document.getElementById("birthTime").value;
+            const location = document.getElementById("location").value;
+
             const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart"; // Replace with your API endpoint
             const errorMessage = document.getElementById("errorMessage");
+            const chartContainer = document.getElementById("chartContainer");
 
             try {
+                // Construct the API request payload
+                const requestData = {
+                    birthDate: birthDate,
+                    birthTime: birthTime,
+                    location: location,
+                };
+
                 // Fetch data from the API
-                const response = await fetch(apiUrl);
+                const response = await fetch(apiUrl, {
+                    method: "POST", // Use POST for sending input data
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(requestData),
+                });
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -48,6 +84,9 @@
 
                 // Render the chart
                 chart.radix(chartData);
+
+                // Show the chart container
+                chartContainer.style.display = "block";
 
                 console.log("Astrology chart rendered successfully!");
             } catch (error) {
