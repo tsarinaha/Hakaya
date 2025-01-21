@@ -21,8 +21,6 @@
 </head>
 <body>
   <h1>Your Natal Chart</h1>
-
-  <!-- User Input Form -->
   <form id="natal-chart-form">
     <input type="text" id="name" placeholder="Enter your name" required>
     <input type="date" id="birth_date" required>
@@ -30,16 +28,13 @@
     <input type="text" id="location" placeholder="Enter your birth location" required>
     <button type="submit">Generate Chart</button>
   </form>
-
   <div id="chart-container"></div>
-
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const form = document.getElementById('natal-chart-form');
 
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
-
         const requestData = {
           name: document.getElementById('name').value,
           birth_date: document.getElementById('birth_date').value,
@@ -63,17 +58,16 @@
           }
 
           // Initialize and render the chart
-        const chart = new astrochart.Chart('chart-container', 600, 600);
-chart.radix({
-  planets: data.planets,
-  houses: data.houses,
-  theme: {
-    planet: { color: 'blue' },
-    house: { borderColor: 'gray' },
-    aspect: { lineColor: 'red' },
-  },
-});
-          chart.radix();
+          const chart = new astrochart.Chart('chart-container', 600, 600);
+          chart.radix({
+            planets: data.planets,
+            houses: data.houses,
+            theme: {
+              planet: { color: 'blue' },
+              house: { borderColor: 'gray' },
+              aspect: { lineColor: 'red' },
+            },
+          });
         } catch (err) {
           console.error("Error fetching or rendering chart:", err.message);
         }
