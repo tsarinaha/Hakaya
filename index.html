@@ -3,35 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AstroChart Example</title>
-    <script src="dist/astrochart.js"></script> <!-- Ensure this path is correct -->
+    <title>Astrology Chart Test</title>
+    <script src="dist/astrochart.js"></script>
     <style>
         #chartContainer {
             width: 800px;
             height: 800px;
             border: 1px solid black;
-            margin: 20px auto;
+            margin: auto;
         }
     </style>
 </head>
 <body>
-    <h1>Astrology Chart</h1>
+    <h1 style="text-align: center;">Astrology Chart</h1>
     <div id="chartContainer"></div>
     <script>
         window.onload = function () {
-            const chart = new astrology.Chart('chartContainer', 800, 800);
-            chart.radix({
-                planets: {
-                    Sun: [0],
-                    Moon: [30],
-                    Mercury: [60],
-                    Venus: [90],
-                    Mars: [120],
-                    Jupiter: [150],
-                    Saturn: [180],
-                },
-                cusps: [300, 340, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300],
-            });
+            try {
+                const data = {
+                    planets: {
+                        Sun: [15],      // 15° Aries
+                        Moon: [45],     // 15° Taurus
+                        Mercury: [75],  // 15° Gemini
+                        Venus: [105],   // 15° Cancer
+                    },
+                    cusps: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330],
+                };
+
+                const chart = new astrology.Chart('chartContainer', 800, 800);
+                chart.radix(data);
+
+                console.log("Chart rendered successfully!");
+            } catch (error) {
+                console.error("Error rendering chart:", error);
+            }
         };
     </script>
 </body>
