@@ -77,7 +77,7 @@
                 }
 
                 const apiData = await response.json();
-                console.log("Raw API Response for Planets:", apiData.planets);
+                console.log("Raw API Response:", apiData);
 
                 // Map API data to AstroChart format
                 const chartData = mapApiData(apiData);
@@ -118,14 +118,18 @@
                 "بلوتو": "Pluto",
             };
 
-            // Ensure planets are arrays with valid names
+            // Ensure planets are arrays with valid names and longitudes
             const mappedPlanets = {};
-            for (const [arabicName, planetData] of Object.entries(apiData.planets)) {
-                const englishName = planetNameMapping[arabicName];
-                if (englishName && planetData && !isNaN(planetData.longitude)) {
+            for (const [index, planetData] of Object.entries(apiData.planets)) {
+                const englishName = planetNameMapping[planetData.name];
+                if (englishName && planetData.longitude && !isNaN(planetData.longitude)) {
                     mappedPlanets[englishName] = [planetData.longitude];
+                    console.log(`Mapped ${planetData.name} to ${englishName} with longitude ${planetData.longitude}`);
                 } else {
-                    console.warn(`Invalid value for planet ${arabicName}:`, planetData);
+                    console.warn(
+                        `Invalid value or no mapping for planet:\nIndex: ${index}, Name: ${planetData.name}, Data: `,
+                        planetData
+                    );
                 }
             }
 
