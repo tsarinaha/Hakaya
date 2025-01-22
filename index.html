@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Astrology Chart</title>
+    <title>الجدول الفلكي التفاعلي</title>
     <script src="https://unpkg.com/@astrodraw/astrochart"></script>
     <style>
         #chartContainer {
@@ -13,7 +13,17 @@
             border: 1px solid black;
             display: none; /* Hidden initially */
         }
-        h1 {
+        #dataTable {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            text-align: right;
+        }
+        #dataTable th, #dataTable td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+        h1, h2 {
             text-align: center;
         }
         form {
@@ -31,16 +41,26 @@
     </style>
 </head>
 <body>
-    <h1>Interactive Astrology Chart</h1>
+    <h1>الجدول الفلكي التفاعلي</h1>
     <form id="chartForm">
-        <input type="text" id="name" placeholder="Full Name" required>
+        <input type="text" id="name" placeholder="الاسم الكامل" required>
         <input type="date" id="birthDate" required>
         <input type="time" id="birthTime" required>
-        <input type="text" id="location" placeholder="Location (City, Country)" required>
-        <button type="submit">Generate Chart</button>
+        <input type="text" id="location" placeholder="الموقع (المدينة، الدولة)" required>
+        <button type="submit">إنشاء الرسم البياني</button>
     </form>
-    <div id="errorMessage" style="display: none;">Failed to load chart data. Please check your input.</div>
+    <div id="errorMessage" style="display: none;">فشل تحميل البيانات. يرجى التحقق من الإدخال الخاص بك.</div>
     <div id="chartContainer"></div>
+    <h2>بيانات الكواكب والطالع</h2>
+    <table id="dataTable" style="display: none;">
+        <thead>
+            <tr>
+                <th>الجسم الفلكي</th>
+                <th>الدرجة</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
     <script>
         document.getElementById("chartForm").addEventListener("submit", async function (event) {
             event.preventDefault();
@@ -53,6 +73,8 @@
             const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
             const errorMessage = document.getElementById("errorMessage");
             const chartContainer = document.getElementById("chartContainer");
+            const dataTable = document.getElementById("dataTable");
+            const tableBody = dataTable.querySelector("tbody");
 
             try {
                 const requestData = {
@@ -82,29 +104,28 @@
                 // Map API data to AstroChart format
                 const chartData = mapApiData(apiData);
                 console.log("Sanitized Planets Data:", chartData.planets);
-                console.log("Sanitized Cusps Data:", chartData.cusps);
-
-                const chart = new astrochart.Chart("chartContainer", 800, 800);
-
-                // Expose chart instance globally for debugging
-                window.chart = chart;
-                console.log("Chart Instance (Global):", window.chart);
 
                 // Render the chart
+                const chart = new astrochart.Chart("chartContainer", 800, 800);
                 chart.radix(chartData);
 
                 // Show the chart container
                 chartContainer.style.display = "block";
                 console.log("Chart rendered successfully!");
+
+                // Populate the data table
+                populateTable(apiData.planets, apiData.cusps);
+
+                // Show the table
+                dataTable.style.display = "table";
             } catch (error) {
                 console.error("Error fetching or rendering chart data:", error);
                 errorMessage.style.display = "block";
             }
         });
 
-        // Function to map API response to AstroChart format
+        // Map API data for AstroChart
         function mapApiData(apiData) {
-            // Arabic-to-English mapping
             const planetNameMapping = {
                 "الشمس": "Sun",
                 "القمر": "Moon",
@@ -118,26 +139,53 @@
                 "بلوتو": "Pluto",
             };
 
-            // Ensure planets are arrays with valid names and longitudes
             const mappedPlanets = {};
             for (const [index, planetData] of Object.entries(apiData.planets)) {
                 const englishName = planetNameMapping[planetData.name];
                 if (englishName && planetData.longitude && !isNaN(planetData.longitude)) {
                     mappedPlanets[englishName] = [planetData.longitude];
-                    console.log(`Mapped ${planetData.name} to ${englishName} with longitude ${planetData.longitude}`);
-                } else {
-                    console.warn(
-                        `Invalid value or no mapping for planet:\nIndex: ${index}, Name: ${planetData.name}, Data: `,
-                        planetData
-                    );
                 }
             }
 
             return {
-                planets: mappedPlanets, // Correctly formatted planets
-                cusps: apiData.cusps || [], // Pass house cusps or default to empty array
-                aspects: apiData.aspects || [], // Pass aspects or default to empty array
+                planets: mappedPlanets,
+                cusps: apiData.cusps || [],
+                aspects: apiData.aspects || [],
             };
+        }
+
+        // Populate data table
+        function populateTable(planets, cusps) {
+            const tableBody = document.querySelector("#dataTable tbody");
+            tableBody.innerHTML = ""; // Clear any existing rows
+
+            // Add planets to the table
+            Object.values(planets).forEach((planet) => {
+                const row = document.createElement("tr");
+                const arabicNameCell = document.createElement("td");
+                const longitudeCell = document.createElement("td");
+
+                arabicNameCell.textContent = planet.name;
+                longitudeCell.textContent = `${planet.longitude.toFixed(2)}°`;
+
+                row.appendChild(arabicNameCell);
+                row.appendChild(longitudeCell);
+                tableBody.appendChild(row);
+            });
+
+            // Add ascendant and house cusps
+            cusps.forEach((cusp, index) => {
+                const row = document.createElement("tr");
+                const houseCell = document.createElement("td");
+                const cuspCell = document.createElement("td");
+
+                houseCell.textContent = `بيت ${index + 1}`;
+                cuspCell.textContent = `${cusp.toFixed(2)}°`;
+
+                row.appendChild(houseCell);
+                row.appendChild(cuspCell);
+                tableBody.appendChild(row);
+            });
         }
     </script>
 </body>
