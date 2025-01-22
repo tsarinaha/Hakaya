@@ -87,9 +87,13 @@
                 }
             }
 
+            if (!apiData.cusps || apiData.cusps.length !== 12) {
+                throw new Error("Invalid API response: 'cusps' array must have exactly 12 values.");
+            }
+
             return {
                 planets: mappedPlanets,
-                cusps: apiData.cusps || [],
+                cusps: apiData.cusps,
                 aspects: apiData.aspects || [],
             };
         }
