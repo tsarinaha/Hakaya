@@ -11,7 +11,7 @@
             height: 800px;
             margin: 20px auto;
             border: 1px solid black;
-            display: none; /* Hidden initially */
+            display: none;
         }
         #dataTable {
             width: 80%;
@@ -74,7 +74,6 @@
             const errorMessage = document.getElementById("errorMessage");
             const chartContainer = document.getElementById("chartContainer");
             const dataTable = document.getElementById("dataTable");
-            const tableBody = dataTable.querySelector("tbody");
 
             try {
                 const requestData = {
@@ -124,49 +123,25 @@
             }
         });
 
-        // Map API data for AstroChart
-        function mapApiData(apiData) {
-            const planetNameMapping = {
-                "الشمس": "Sun",
-                "القمر": "Moon",
-                "عطارد": "Mercury",
-                "الزهرة": "Venus",
-                "المريخ": "Mars",
-                "المشتري": "Jupiter",
-                "زحل": "Saturn",
-                "أورانوس": "Uranus",
-                "نبتون": "Neptune",
-                "بلوتو": "Pluto",
-            };
-
-            const mappedPlanets = {};
-            for (const [index, planetData] of Object.entries(apiData.planets)) {
-                const englishName = planetNameMapping[planetData.name];
-                if (englishName && planetData.longitude && !isNaN(planetData.longitude)) {
-                    mappedPlanets[englishName] = [planetData.longitude];
-                }
-            }
-
-            return {
-                planets: mappedPlanets,
-                cusps: apiData.cusps || [],
-                aspects: apiData.aspects || [],
-            };
-        }
-
         // Populate data table
         function populateTable(planets, cusps) {
             const tableBody = document.querySelector("#dataTable tbody");
             tableBody.innerHTML = ""; // Clear any existing rows
 
             // Add planets to the table
-            Object.values(planets).forEach((planet) => {
+            Object.entries(planets).forEach(([index, planetData]) => {
                 const row = document.createElement("tr");
                 const arabicNameCell = document.createElement("td");
                 const longitudeCell = document.createElement("td");
 
-                arabicNameCell.textContent = planet.name;
-                longitudeCell.textContent = `${planet.longitude.toFixed(2)}°`;
+                // Check if planetData contains valid fields
+                if (planetData && planetData.name && !isNaN(planetData.longitude)) {
+                    arabicNameCell.textContent = planetData.name; // Arabic planet name
+                    longitudeCell.textContent = `${planetData.longitude.toFixed(2)}°`; // Longitude value
+                } else {
+                    arabicNameCell.textContent = `غير معروف (${index})`; // Fallback for invalid planets
+                    longitudeCell.textContent = "N/A";
+                }
 
                 row.appendChild(arabicNameCell);
                 row.appendChild(longitudeCell);
@@ -179,8 +154,8 @@
                 const houseCell = document.createElement("td");
                 const cuspCell = document.createElement("td");
 
-                houseCell.textContent = `بيت ${index + 1}`;
-                cuspCell.textContent = `${cusp.toFixed(2)}°`;
+                houseCell.textContent = `بيت ${index + 1}`; // House number
+                cuspCell.textContent = `${cusp.toFixed(2)}°`; // Cusp degree
 
                 row.appendChild(houseCell);
                 row.appendChild(cuspCell);
