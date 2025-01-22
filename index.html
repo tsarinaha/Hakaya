@@ -160,6 +160,32 @@
                 row.appendChild(houseCell);
                 row.appendChild(cuspCell);
                 tableBody.appendChild(row);
+
+                function populateTableFromBackend(tableData) {
+    const tableBody = document.querySelector("#dataTable tbody");
+    tableBody.innerHTML = ""; // Clear any existing rows
+
+    tableData.forEach((row) => {
+        const tableRow = document.createElement("tr");
+        const typeCell = document.createElement("td");
+        const nameCell = document.createElement("td");
+        const degreeCell = document.createElement("td");
+        const zodiacCell = document.createElement("td");
+
+        typeCell.textContent = row.type;
+        nameCell.textContent = row.name;
+        degreeCell.textContent = row.degree;
+        zodiacCell.textContent = row.zodiac_sign;
+
+        tableRow.appendChild(typeCell);
+        tableRow.appendChild(nameCell);
+        tableRow.appendChild(degreeCell);
+        tableRow.appendChild(zodiacCell);
+        tableBody.appendChild(tableRow);
+    });
+
+    document.getElementById("dataTable").style.display = "table"; // Show the table
+}
             });
         }
     </script>
