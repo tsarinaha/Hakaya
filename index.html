@@ -55,13 +55,73 @@
     <table id="dataTable" style="display: none;">
         <thead>
             <tr>
+                <th>النوع</th>
                 <th>الجسم الفلكي</th>
                 <th>الدرجة</th>
+                <th>البرج</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
     <script>
+        // Define the mapApiData function
+        function mapApiData(apiData) {
+            const planetNameMapping = {
+                "الشمس": "Sun",
+                "القمر": "Moon",
+                "عطارد": "Mercury",
+                "الزهرة": "Venus",
+                "المريخ": "Mars",
+                "المشتري": "Jupiter",
+                "زحل": "Saturn",
+                "أورانوس": "Uranus",
+                "نبتون": "Neptune",
+                "بلوتو": "Pluto",
+            };
+
+            const mappedPlanets = {};
+            for (const planet of apiData.planets) {
+                const englishName = planetNameMapping[planet.name];
+                if (englishName && !isNaN(planet.longitude)) {
+                    mappedPlanets[englishName] = [planet.longitude];
+                }
+            }
+
+            return {
+                planets: mappedPlanets,
+                cusps: apiData.cusps || [],
+                aspects: apiData.aspects || [],
+            };
+        }
+
+        // Function to populate the table from backend data
+        function populateTableFromBackend(tableData) {
+            const tableBody = document.querySelector("#dataTable tbody");
+            tableBody.innerHTML = ""; // Clear any existing rows
+
+            tableData.forEach((row) => {
+                const tableRow = document.createElement("tr");
+                const typeCell = document.createElement("td");
+                const nameCell = document.createElement("td");
+                const degreeCell = document.createElement("td");
+                const zodiacCell = document.createElement("td");
+
+                typeCell.textContent = row.type;
+                nameCell.textContent = row.name;
+                degreeCell.textContent = row.degree;
+                zodiacCell.textContent = row.zodiac_sign;
+
+                tableRow.appendChild(typeCell);
+                tableRow.appendChild(nameCell);
+                tableRow.appendChild(degreeCell);
+                tableRow.appendChild(zodiacCell);
+                tableBody.appendChild(tableRow);
+            });
+
+            document.getElementById("dataTable").style.display = "table"; // Show the table
+        }
+
+        // Form submission event
         document.getElementById("chartForm").addEventListener("submit", async function (event) {
             event.preventDefault();
 
@@ -73,7 +133,6 @@
             const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
             const errorMessage = document.getElementById("errorMessage");
             const chartContainer = document.getElementById("chartContainer");
-            const dataTable = document.getElementById("dataTable");
 
             try {
                 const requestData = {
@@ -113,81 +172,13 @@
                 console.log("Chart rendered successfully!");
 
                 // Populate the data table
-                populateTable(apiData.planets, apiData.cusps);
+                populateTableFromBackend(apiData.table_data);
 
-                // Show the table
-                dataTable.style.display = "table";
             } catch (error) {
                 console.error("Error fetching or rendering chart data:", error);
                 errorMessage.style.display = "block";
             }
         });
-
-        // Populate data table
-        function populateTable(planets, cusps) {
-            const tableBody = document.querySelector("#dataTable tbody");
-            tableBody.innerHTML = ""; // Clear any existing rows
-
-            // Add planets to the table
-            Object.entries(planets).forEach(([index, planetData]) => {
-                const row = document.createElement("tr");
-                const arabicNameCell = document.createElement("td");
-                const longitudeCell = document.createElement("td");
-
-                // Check if planetData contains valid fields
-                if (planetData && planetData.name && !isNaN(planetData.longitude)) {
-                    arabicNameCell.textContent = planetData.name; // Arabic planet name
-                    longitudeCell.textContent = `${planetData.longitude.toFixed(2)}°`; // Longitude value
-                } else {
-                    arabicNameCell.textContent = `غير معروف (${index})`; // Fallback for invalid planets
-                    longitudeCell.textContent = "N/A";
-                }
-
-                row.appendChild(arabicNameCell);
-                row.appendChild(longitudeCell);
-                tableBody.appendChild(row);
-            });
-
-            // Add ascendant and house cusps
-            cusps.forEach((cusp, index) => {
-                const row = document.createElement("tr");
-                const houseCell = document.createElement("td");
-                const cuspCell = document.createElement("td");
-
-                houseCell.textContent = `بيت ${index + 1}`; // House number
-                cuspCell.textContent = `${cusp.toFixed(2)}°`; // Cusp degree
-
-                row.appendChild(houseCell);
-                row.appendChild(cuspCell);
-                tableBody.appendChild(row);
-
-                function populateTableFromBackend(tableData) {
-    const tableBody = document.querySelector("#dataTable tbody");
-    tableBody.innerHTML = ""; // Clear any existing rows
-
-    tableData.forEach((row) => {
-        const tableRow = document.createElement("tr");
-        const typeCell = document.createElement("td");
-        const nameCell = document.createElement("td");
-        const degreeCell = document.createElement("td");
-        const zodiacCell = document.createElement("td");
-
-        typeCell.textContent = row.type;
-        nameCell.textContent = row.name;
-        degreeCell.textContent = row.degree;
-        zodiacCell.textContent = row.zodiac_sign;
-
-        tableRow.appendChild(typeCell);
-        tableRow.appendChild(nameCell);
-        tableRow.appendChild(degreeCell);
-        tableRow.appendChild(zodiacCell);
-        tableBody.appendChild(tableRow);
-    });
-
-    document.getElementById("dataTable").style.display = "table"; // Show the table
-}
-            });
-        }
     </script>
 </body>
 </html>
