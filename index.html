@@ -67,13 +67,13 @@
         // Define mapApiData
         function mapApiData(apiData) {
             const planets = apiData.planets || [];
-            const houses = apiData.houses || [];
             const ascendant = apiData.ascendant || {};
+            const houses = apiData.houses || [];
             return { planets, houses, ascendant };
         }
 
         // Populate the table
-        function populateTable(planets, houses, ascendant) {
+        function populateTable(ascendant, planets, houses) {
             const tableBody = document.querySelector("#dataTable tbody");
             tableBody.innerHTML = ""; // Clear existing rows
 
