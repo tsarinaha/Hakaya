@@ -64,7 +64,6 @@
         <tbody></tbody>
     </table>
     <script>
-        // Define mapApiData at the top
         function mapApiData(apiData) {
             const planetNameMapping = {
                 "الشمس": "Sun",
@@ -80,28 +79,28 @@
             };
 
             const mappedPlanets = {};
-            for (const planet of apiData.planets) {
+            for (const planet of apiData.planets || []) {
                 const englishName = planetNameMapping[planet.name];
                 if (englishName && !isNaN(planet.longitude)) {
                     mappedPlanets[englishName] = [planet.longitude];
                 }
             }
 
-            if (!apiData.cusps || apiData.cusps.length !== 12) {
-                throw new Error("Invalid API response: 'cusps' array must have exactly 12 values.");
-            }
-
             return {
                 planets: mappedPlanets,
-                cusps: apiData.cusps,
+                cusps: apiData.cusps || [],
                 aspects: apiData.aspects || [],
             };
         }
 
-        // Function to populate the table from backend data
         function populateTableFromBackend(tableData) {
             const tableBody = document.querySelector("#dataTable tbody");
             tableBody.innerHTML = ""; // Clear any existing rows
+
+            if (!Array.isArray(tableData) || tableData.length === 0) {
+                console.error("Invalid or empty table data received.");
+                return;
+            }
 
             tableData.forEach((row) => {
                 const tableRow = document.createElement("tr");
@@ -110,10 +109,10 @@
                 const degreeCell = document.createElement("td");
                 const zodiacCell = document.createElement("td");
 
-                typeCell.textContent = row.type;
-                nameCell.textContent = row.name;
-                degreeCell.textContent = row.degree;
-                zodiacCell.textContent = row.zodiac_sign;
+                typeCell.textContent = row.type || "N/A";
+                nameCell.textContent = row.name || "N/A";
+                degreeCell.textContent = row.degree || "N/A";
+                zodiacCell.textContent = row.zodiac_sign || "N/A";
 
                 tableRow.appendChild(typeCell);
                 tableRow.appendChild(nameCell);
@@ -125,7 +124,6 @@
             document.getElementById("dataTable").style.display = "table"; // Show the table
         }
 
-        // Form submission event
         document.getElementById("chartForm").addEventListener("submit", async function (event) {
             event.preventDefault();
 
@@ -146,8 +144,6 @@
                     location: location,
                 };
 
-                console.log("Request Data (sent to API):", JSON.stringify(requestData));
-
                 const response = await fetch(apiUrl, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -163,20 +159,15 @@
                 const apiData = await response.json();
                 console.log("Raw API Response:", apiData);
 
-                // Map API data to AstroChart format
                 const chartData = mapApiData(apiData);
                 console.log("Sanitized Planets Data:", chartData.planets);
 
-                // Render the chart
                 const chart = new astrochart.Chart("chartContainer", 800, 800);
                 chart.radix(chartData);
 
-                // Show the chart container
                 chartContainer.style.display = "block";
-                console.log("Chart rendered successfully!");
 
-                // Populate the data table
-                populateTableFromBackend(apiData.table_data);
+                populateTableFromBackend(apiData.table_data || []);
 
             } catch (error) {
                 console.error("Error fetching or rendering chart data:", error);
