@@ -64,7 +64,7 @@
         <tbody></tbody>
     </table>
     <script>
-        // Ensure mapApiData is defined before usage
+        // Map API data to the format required by AstroChart
         function mapApiData(apiData) {
             const planetNameMapping = {
                 "الشمس": "Sun",
@@ -93,6 +93,8 @@
                 aspects: apiData.aspects || [],
             };
         }
+
+        console.log("mapApiData is defined:", typeof mapApiData); // Debugging
 
         // Populate the table with backend data
         function populateTable(planets, houses, ascendant) {
@@ -145,7 +147,7 @@
             const birthTime = document.getElementById("birthTime").value;
             const location = document.getElementById("location").value;
 
-            const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
+            const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart"; // Your API endpoint
             const errorMessage = document.getElementById("errorMessage");
             const chartContainer = document.getElementById("chartContainer");
 
