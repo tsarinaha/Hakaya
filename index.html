@@ -63,128 +63,135 @@
         <tbody></tbody>
     </table>
     <script>
-    function mapApiData(apiData) {
-        const planetNameMapping = {
-            "الشمس": "Sun",
-            "القمر": "Moon",
-            "عطارد": "Mercury",
-            "الزهرة": "Venus",
-            "المريخ": "Mars",
-            "المشتري": "Jupiter",
-            "زحل": "Saturn",
-            "أورانوس": "Uranus",
-            "نبتون": "Neptune",
-            "بلوتو": "Pluto",
-        };
+        function mapApiData(apiData) {
+            console.log("Full API Data:", apiData);
+            const planetNameMapping = {
+                "الشمس": "Sun",
+                "القمر": "Moon",
+                "عطارد": "Mercury",
+                "الزهرة": "Venus",
+                "المريخ": "Mars",
+                "المشتري": "Jupiter",
+                "زحل": "Saturn",
+                "أورانوس": "Uranus",
+                "نبتون": "Neptune",
+                "بلوتو": "Pluto",
+            };
 
-        const mappedPlanets = {};
-        for (const planet of apiData.planets || []) {
-            const englishName = planetNameMapping[planet.name];
-            if (englishName && !isNaN(planet.position)) {
-                mappedPlanets[englishName] = [planet.position];
+            const mappedPlanets = {};
+            for (const planet of apiData.planets || []) {
+                console.log("Mapping Planet:", planet);
+                const englishName = planetNameMapping[planet.name];
+                if (englishName && !isNaN(planet.position)) {
+                    mappedPlanets[englishName] = [planet.position];
+                }
             }
+
+            const cusps = apiData.cusps || [];
+            console.log("Raw Cusps Data:", cusps);
+            while (cusps.length < 12) {
+                cusps.push(0); // Ensure 12 cusps
+            }
+
+            return {
+                planets: mappedPlanets,
+                cusps: cusps.slice(0, 12),
+                aspects: apiData.aspects || [],
+            };
         }
 
-        const cusps = apiData.cusps || [];
-        while (cusps.length < 12) {
-            cusps.push(0); // Ensure 12 cusps
-        }
+        function populateTable(apiData) {
+            const tableBody = document.querySelector("#dataTable tbody");
+            tableBody.innerHTML = "";
 
-        return {
-            planets: mappedPlanets,
-            cusps: cusps.slice(0, 12),
-            aspects: apiData.aspects || [],
-        };
-    }
+            const planets = apiData.planets || [];
+            const houses = apiData.houses || [];
 
-    function populateTable(apiData) {
-        const tableBody = document.querySelector("#dataTable tbody");
-        tableBody.innerHTML = "";
+            console.log("Planets for Table:", planets);
+            console.log("Houses for Table:", houses);
 
-        const planets = apiData.planets || [];
-        const houses = apiData.houses || [];
+            // Populate planets
+            planets.forEach((planet) => {
+                console.log("Adding planet to table:", planet);
+                const row = document.createElement("tr");
+                const nameCell = document.createElement("td");
+                const degreeCell = document.createElement("td");
+                const signCell = document.createElement("td");
 
-        if (!planets.length && !houses.length) {
-            console.error("No valid data to populate the table.");
-            return;
-        }
+                nameCell.textContent = planet.name;
+                degreeCell.textContent = `${planet.position.toFixed(2)}°`;
+                signCell.textContent = planet.zodiac_sign;
 
-        // Populate planets
-        planets.forEach((planet) => {
-            const row = document.createElement("tr");
-            const nameCell = document.createElement("td");
-            const degreeCell = document.createElement("td");
-            const signCell = document.createElement("td");
-
-            nameCell.textContent = planet.name;
-            degreeCell.textContent = `${planet.position.toFixed(2)}°`;
-            signCell.textContent = planet.zodiac_sign;
-
-            row.appendChild(nameCell);
-            row.appendChild(degreeCell);
-            row.appendChild(signCell);
-            tableBody.appendChild(row);
-        });
-
-        // Populate houses
-        houses.forEach((house) => {
-            const row = document.createElement("tr");
-            const houseCell = document.createElement("td");
-            const degreeCell = document.createElement("td");
-            const signCell = document.createElement("td");
-
-            houseCell.textContent = `بيت ${house.house}`;
-            degreeCell.textContent = `${house.degree.toFixed(2)}°`;
-            signCell.textContent = house.zodiac_sign;
-
-            row.appendChild(houseCell);
-            row.appendChild(degreeCell);
-            row.appendChild(signCell);
-            tableBody.appendChild(row);
-        });
-        document.getElementById("dataTable").style.display = "table";
-    }
-
-    document.getElementById("chartForm").addEventListener("submit", async function (event) {
-        event.preventDefault();
-
-        const name = document.getElementById("name").value;
-        const birthDate = document.getElementById("birthDate").value;
-        const birthTime = document.getElementById("birthTime").value;
-        const location = document.getElementById("location").value;
-
-        const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
-        const errorMessage = document.getElementById("errorMessage");
-        const chartContainer = document.getElementById("chartContainer");
-
-        try {
-            const requestData = { name, birth_date: birthDate, birth_time: birthTime, location };
-            const response = await fetch(apiUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(requestData),
+                row.appendChild(nameCell);
+                row.appendChild(degreeCell);
+                row.appendChild(signCell);
+                tableBody.appendChild(row);
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error: ${response.status}`);
-            }
+            // Populate houses
+            houses.forEach((house) => {
+                console.log("Adding house to table:", house);
+                const row = document.createElement("tr");
+                const houseCell = document.createElement("td");
+                const degreeCell = document.createElement("td");
+                const signCell = document.createElement("td");
 
-            const apiData = await response.json();
-            console.log("API Data:", apiData);
+                houseCell.textContent = `بيت ${house.house}`;
+                degreeCell.textContent = `${house.degree.toFixed(2)}°`;
+                signCell.textContent = house.zodiac_sign;
 
-            // Render the chart
-            const chartData = mapApiData(apiData);
-            const chart = new astrochart.Chart("chartContainer", 800, 800);
-            chart.radix(chartData);
-            chartContainer.style.display = "block";
+                row.appendChild(houseCell);
+                row.appendChild(degreeCell);
+                row.appendChild(signCell);
+                tableBody.appendChild(row);
+            });
 
-            // Populate table
-            populateTable(apiData);
-        } catch (error) {
-            console.error("Error fetching or rendering chart data:", error);
-            errorMessage.style.display = "block";
+            document.getElementById("dataTable").style.display = "table";
         }
-    });
+
+        document.getElementById("chartForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const birthDate = document.getElementById("birthDate").value;
+            const birthTime = document.getElementById("birthTime").value;
+            const location = document.getElementById("location").value;
+
+            const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
+            const errorMessage = document.getElementById("errorMessage");
+            const chartContainer = document.getElementById("chartContainer");
+
+            try {
+                const requestData = { name, birth_date: birthDate, birth_time: birthTime, location };
+                console.log("Request Data:", requestData);
+
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(requestData),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+
+                const apiData = await response.json();
+                console.log("API Data:", apiData);
+
+                // Render the chart
+                const chartData = mapApiData(apiData);
+                console.log("Mapped Chart Data:", chartData);
+                const chart = new astrochart.Chart("chartContainer", 800, 800);
+                chart.radix(chartData);
+                chartContainer.style.display = "block";
+
+                // Populate table
+                populateTable(apiData);
+            } catch (error) {
+                console.error("Error fetching or rendering chart data:", error);
+                errorMessage.style.display = "block";
+            }
+        });
     </script>
 </body>
 </html>
