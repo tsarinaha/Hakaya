@@ -97,53 +97,52 @@
             };
         }
 
-        function populateTable(apiData) {
-            const tableBody = document.querySelector("#dataTable tbody");
-            tableBody.innerHTML = "";
+      function populateTable(apiData) {
+    const tableBody = document.querySelector("#dataTable tbody");
+    tableBody.innerHTML = "";
 
-            const planets = apiData.planets || [];
-            const houses = apiData.houses || [];
+    const planets = apiData.planets || [];
+    const houses = apiData.houses || [];
 
-            if (!planets.length && !houses.length) {
-                console.error("No valid data to populate the table.");
-                return;
-            }
+    console.log("Planets for Table:", planets);
+    console.log("Houses for Table:", houses);
 
-            // Populate planets
-            planets.forEach((planet) => {
-                const row = document.createElement("tr");
-                const nameCell = document.createElement("td");
-                const degreeCell = document.createElement("td");
-                const signCell = document.createElement("td");
+    // Populate planets
+    planets.forEach((planet) => {
+        const row = document.createElement("tr");
+        const nameCell = document.createElement("td");
+        const degreeCell = document.createElement("td");
+        const signCell = document.createElement("td");
 
-                nameCell.textContent = planet.name;
-                degreeCell.textContent = `${planet.position.toFixed(2)}°`;
-                signCell.textContent = planet.zodiac_sign;
+        nameCell.textContent = planet.name;
+        degreeCell.textContent = `${planet.position.toFixed(2)}°`;
+        signCell.textContent = planet.zodiac_sign;
 
-                row.appendChild(nameCell);
-                row.appendChild(degreeCell);
-                row.appendChild(signCell);
-                tableBody.appendChild(row);
-            });
+        row.appendChild(nameCell);
+        row.appendChild(degreeCell);
+        row.appendChild(signCell);
+        tableBody.appendChild(row);
+    });
 
-            // Populate houses
-            houses.forEach((house) => {
-                const row = document.createElement("tr");
-                const houseCell = document.createElement("td");
-                const degreeCell = document.createElement("td");
-                const signCell = document.createElement("td");
+    // Populate houses
+    houses.forEach((house) => {
+        const row = document.createElement("tr");
+        const houseCell = document.createElement("td");
+        const degreeCell = document.createElement("td");
+        const signCell = document.createElement("td");
 
-                houseCell.textContent = `بيت ${house.house}`;
-                degreeCell.textContent = `${house.degree.toFixed(2)}°`;
-                signCell.textContent = house.zodiac_sign;
+        houseCell.textContent = `بيت ${house.house}`;
+        degreeCell.textContent = `${house.degree.toFixed(2)}°`;
+        signCell.textContent = house.zodiac_sign;
 
-                row.appendChild(houseCell);
-                row.appendChild(degreeCell);
-                row.appendChild(signCell);
-                tableBody.appendChild(row);
-            });
+        row.appendChild(houseCell);
+        row.appendChild(degreeCell);
+        row.appendChild(signCell);
+        tableBody.appendChild(row);
+    });
 
-            document.getElementById("dataTable").style.display = "table";
+    document.getElementById("dataTable").style.display = "table";
+}
         }
 
         document.getElementById("chartForm").addEventListener("submit", async function (event) {
