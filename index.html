@@ -149,41 +149,52 @@
             document.getElementById("dataTable").style.display = "table";
         }
 
-        document.getElementById("chartForm").addEventListener("submit", async function (event) {
-            event.preventDefault();
+     document.getElementById("chartForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-            const name = document.getElementById("name").value;
-            const birthDate = document.getElementById("birthDate").value;
-            const birthTime = document.getElementById("birthTime").value;
-            const location = document.getElementById("location").value;
+    const name = document.getElementById("name").value;
+    const birthDate = document.getElementById("birthDate").value;
+    const birthTime = document.getElementById("birthTime").value;
+    const location = document.getElementById("location").value;
 
-            const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
-            const errorMessage = document.getElementById("errorMessage");
-            const chartContainer = document.getElementById("chartContainer");
+    const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
+    const errorMessage = document.getElementById("errorMessage");
+    const chartContainer = document.getElementById("chartContainer");
 
-            try {
-                const requestData = { name, birth_date: birthDate, birth_time: birthTime, location };
-                console.log("Request Data:", requestData);
+    try {
+        const requestData = { name, birth_date: birthDate, birth_time: birthTime, location };
+        console.log("Request Payload:", requestData); // Log request payload
 
-                const response = await fetch(apiUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(requestData),
-                });
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData),
+        });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
-                }
+        console.log("API Response Status:", response.status); // Log status
 
-                const apiData = await response.json();
-                console.log("API Data:", apiData);
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
 
-                // Render the chart
-                const chartData = mapApiData(apiData);
-                console.log("Mapped Chart Data:", chartData);
-                const chart = new astrochart.Chart("chartContainer", 800, 800);
-                chart.radix(chartData);
-                chartContainer.style.display = "block";
+        const apiData = await response.json();
+        console.log("API Data:", apiData); // Log raw API data
+
+        // Handle chart and table population
+        const chartData = mapApiData(apiData);
+        console.log("Mapped Chart Data:", chartData); // Log mapped chart data
+        const chart = new astrochart.Chart("chartContainer", 800, 800);
+        chart.radix(chartData);
+        chartContainer.style.display = "block";
+    }
+});
+        populateTable(apiData);
+    } catch (error) {
+        console.error("Error fetching or rendering chart data:", error);
+        errorMessage.style.display = "block";
+    }
+});
+
 
                 // Populate table
                 populateTable(apiData);
