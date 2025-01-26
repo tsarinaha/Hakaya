@@ -38,11 +38,16 @@
             text-align: center;
             margin-top: 20px;
         }
-        #ascendantText, #placementsText {
-            width: 80%;
-            margin: 20px auto;
-            text-align: right;
-            font-size: 1.2em;
+        .tooltip {
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
         }
     </style>
 </head>
@@ -57,11 +62,7 @@
     </form>
     <div id="errorMessage" style="display: none;">فشل تحميل البيانات. يرجى التحقق من الإدخال الخاص بك.</div>
     <div id="chartContainer"></div>
-    <div id="ascendantText" style="display: none;">الطالع: <span id="ascendantDisplay"></span></div>
-    <div id="placementsText" style="display: none;">
-        <h2>الطوالع والكواكب</h2>
-        <ul id="placementsList"></ul>
-    </div>
+    <div class="tooltip" id="chartTooltip"></div>
     <h2>بيانات الكواكب والطالع</h2>
     <table id="dataTable" style="display: none;">
         <thead>
@@ -108,74 +109,6 @@
             };
         }
 
-        function populateTable(apiData) {
-            const tableBody = document.querySelector("#dataTable tbody");
-            tableBody.innerHTML = "";
-
-            const planets = apiData.planets || [];
-            const houses = apiData.houses || [];
-
-            console.log("Planets for Table:", planets);
-            console.log("Houses for Table:", houses);
-
-            // Populate planets
-            planets.forEach((planet) => {
-                const row = document.createElement("tr");
-                const nameCell = document.createElement("td");
-                const degreeCell = document.createElement("td");
-                const signCell = document.createElement("td");
-
-                nameCell.textContent = planet.name;
-                degreeCell.textContent = `${planet.position.toFixed(2)}°`;
-                signCell.textContent = planet.zodiac_sign;
-
-                row.appendChild(nameCell);
-                row.appendChild(degreeCell);
-                row.appendChild(signCell);
-                tableBody.appendChild(row);
-            });
-
-            // Populate houses
-            houses.forEach((house) => {
-                const row = document.createElement("tr");
-                const houseCell = document.createElement("td");
-                const degreeCell = document.createElement("td");
-                const signCell = document.createElement("td");
-
-                houseCell.textContent = `بيت ${house.house}`;
-                degreeCell.textContent = `${house.degree.toFixed(2)}°`;
-                signCell.textContent = house.zodiac_sign;
-
-                row.appendChild(houseCell);
-                row.appendChild(degreeCell);
-                row.appendChild(signCell);
-                tableBody.appendChild(row);
-            });
-
-            document.getElementById("dataTable").style.display = "table";
-        }
-
-        function displayAscendantAndPlacements(apiData) {
-            // Display Ascendant
-            const ascendantText = document.getElementById("ascendantText");
-            const ascendantDisplay = document.getElementById("ascendantDisplay");
-            ascendantDisplay.textContent = `${apiData.ascendant.degree.toFixed(2)}° - ${apiData.ascendant.zodiac_sign}`;
-            ascendantText.style.display = "block";
-
-            // Display placements
-            const placementsText = document.getElementById("placementsText");
-            const placementsList = document.getElementById("placementsList");
-            placementsList.innerHTML = "";
-
-            apiData.planets.forEach((planet) => {
-                const listItem = document.createElement("li");
-                listItem.textContent = `${planet.name}: ${planet.position.toFixed(2)}° - ${planet.zodiac_sign}`;
-                placementsList.appendChild(listItem);
-            });
-
-            placementsText.style.display = "block";
-        }
-
         document.getElementById("chartForm").addEventListener("submit", async function (event) {
             event.preventDefault();
 
@@ -209,14 +142,45 @@
                 chart.radix(chartData);
                 chartContainer.style.display = "block";
 
-                // Populate table and display placements
-                populateTable(apiData);
-                displayAscendantAndPlacements(apiData);
+                // Add hover events
+                enableHoverEffect(chart, apiData.planets, apiData.houses);
+
             } catch (error) {
                 console.error("Error fetching or rendering chart data:", error);
                 errorMessage.style.display = "block";
             }
         });
+
+        function enableHoverEffect(chart, planets, houses) {
+            const tooltip = document.getElementById("chartTooltip");
+
+            chart.on("hover", (type, key, data) => {
+                if (type === "planet") {
+                    const planet = planets.find(p => p.name === key);
+                    if (planet) {
+                        showTooltip(event, `${planet.name}: ${planet.position.toFixed(2)}° - ${planet.zodiac_sign}`);
+                    }
+                } else if (type === "house") {
+                    const house = houses.find(h => h.house === parseInt(key, 10));
+                    if (house) {
+                        showTooltip(event, `بيت ${house.house}: ${house.degree.toFixed(2)}°`);
+                    }
+                } else {
+                    hideTooltip();
+                }
+            });
+
+            function showTooltip(event, content) {
+                tooltip.innerHTML = content;
+                tooltip.style.left = `${event.pageX + 10}px`;
+                tooltip.style.top = `${event.pageY + 10}px`;
+                tooltip.style.display = "block";
+            }
+
+            function hideTooltip() {
+                tooltip.style.display = "none";
+            }
+        }
     </script>
 </body>
 </html>
