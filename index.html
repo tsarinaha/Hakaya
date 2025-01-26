@@ -23,21 +23,6 @@
             border: 1px solid black;
             padding: 10px;
         }
-        h1, h2 {
-            text-align: center;
-        }
-        form {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        input, button {
-            margin: 5px;
-        }
-        #errorMessage {
-            color: red;
-            text-align: center;
-            margin-top: 20px;
-        }
         #tooltip {
             position: absolute;
             display: none;
@@ -60,7 +45,6 @@
         <input type="text" id="location" placeholder="الموقع (المدينة، الدولة)" required>
         <button type="submit">إنشاء الرسم البياني</button>
     </form>
-    <div id="errorMessage" style="display: none;">فشل تحميل البيانات. يرجى التحقق من الإدخال الخاص بك.</div>
     <div id="chartContainer"></div>
     <div id="tooltip"></div>
     <h2>بيانات الكواكب والطالع</h2>
@@ -109,55 +93,12 @@
             };
         }
 
-        function populateTable(apiData) {
-            const tableBody = document.querySelector("#dataTable tbody");
-            tableBody.innerHTML = "";
-
-            const planets = apiData.planets || [];
-            const houses = apiData.houses || [];
-
-            planets.forEach((planet) => {
-                const row = document.createElement("tr");
-                const nameCell = document.createElement("td");
-                const degreeCell = document.createElement("td");
-                const signCell = document.createElement("td");
-
-                nameCell.textContent = planet.name;
-                degreeCell.textContent = `${planet.position.toFixed(2)}°`;
-                signCell.textContent = planet.zodiac_sign;
-
-                row.appendChild(nameCell);
-                row.appendChild(degreeCell);
-                row.appendChild(signCell);
-                tableBody.appendChild(row);
-            });
-
-            houses.forEach((house) => {
-                const row = document.createElement("tr");
-                const houseCell = document.createElement("td");
-                const degreeCell = document.createElement("td");
-                const signCell = document.createElement("td");
-
-                houseCell.textContent = `بيت ${house.house}`;
-                degreeCell.textContent = `${house.degree.toFixed(2)}°`;
-                signCell.textContent = house.zodiac_sign;
-
-                row.appendChild(houseCell);
-                row.appendChild(degreeCell);
-                row.appendChild(signCell);
-                tableBody.appendChild(row);
-            });
-
-            document.getElementById("dataTable").style.display = "table";
-        }
-
-        function createTooltip(event, data) {
+        function createTooltip(event, content) {
             const tooltip = document.getElementById("tooltip");
             tooltip.style.left = `${event.pageX + 10}px`;
             tooltip.style.top = `${event.pageY + 10}px`;
             tooltip.style.display = "block";
-
-            tooltip.textContent = `Name: ${data.name}\nPosition: ${data.position.toFixed(2)}° (${data.zodiac_sign})`;
+            tooltip.textContent = content;
         }
 
         function hideTooltip() {
@@ -174,7 +115,6 @@
             const location = document.getElementById("location").value;
 
             const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
-            const errorMessage = document.getElementById("errorMessage");
             const chartContainer = document.getElementById("chartContainer");
 
             try {
@@ -192,22 +132,27 @@
                 const apiData = await response.json();
                 console.log("API Data:", apiData);
 
+                // Render the chart
                 const chartData = mapApiData(apiData);
                 const chart = new astrochart.Chart("chartContainer", 800, 800);
                 chart.radix(chartData);
 
-                // Attach hover events
-                const elements = document.querySelectorAll("#chartContainer [data-hover]");
-                elements.forEach((element) => {
-                    element.addEventListener("mousemove", (event) => createTooltip(event, element.dataset));
+                chartContainer.style.display = "block";
+
+                // Attach hover events to SVG elements
+                const svgElements = chartContainer.querySelectorAll("svg [data-name]");
+                svgElements.forEach((element) => {
+                    const name = element.getAttribute("data-name");
+                    const degree = element.getAttribute("data-degree");
+                    const zodiac = element.getAttribute("data-zodiac");
+
+                    element.addEventListener("mousemove", (event) => {
+                        createTooltip(event, `Name: ${name}, Degree: ${degree}°, Zodiac: ${zodiac}`);
+                    });
                     element.addEventListener("mouseleave", hideTooltip);
                 });
-
-                chartContainer.style.display = "block";
-                populateTable(apiData);
             } catch (error) {
                 console.error("Error fetching or rendering chart data:", error);
-                errorMessage.style.display = "block";
             }
         });
     </script>
