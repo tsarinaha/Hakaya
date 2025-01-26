@@ -11,6 +11,7 @@
             height: 800px;
             margin: 20px auto;
             border: 1px solid black;
+            position: relative;
         }
         #dataTable {
             width: 80%;
@@ -46,6 +47,7 @@
             border-radius: 5px;
             font-size: 12px;
             pointer-events: none;
+            z-index: 1000;
         }
     </style>
 </head>
@@ -107,19 +109,55 @@
             };
         }
 
+        function populateTable(apiData) {
+            const tableBody = document.querySelector("#dataTable tbody");
+            tableBody.innerHTML = "";
+
+            const planets = apiData.planets || [];
+            const houses = apiData.houses || [];
+
+            planets.forEach((planet) => {
+                const row = document.createElement("tr");
+                const nameCell = document.createElement("td");
+                const degreeCell = document.createElement("td");
+                const signCell = document.createElement("td");
+
+                nameCell.textContent = planet.name;
+                degreeCell.textContent = `${planet.position.toFixed(2)}°`;
+                signCell.textContent = planet.zodiac_sign;
+
+                row.appendChild(nameCell);
+                row.appendChild(degreeCell);
+                row.appendChild(signCell);
+                tableBody.appendChild(row);
+            });
+
+            houses.forEach((house) => {
+                const row = document.createElement("tr");
+                const houseCell = document.createElement("td");
+                const degreeCell = document.createElement("td");
+                const signCell = document.createElement("td");
+
+                houseCell.textContent = `بيت ${house.house}`;
+                degreeCell.textContent = `${house.degree.toFixed(2)}°`;
+                signCell.textContent = house.zodiac_sign;
+
+                row.appendChild(houseCell);
+                row.appendChild(degreeCell);
+                row.appendChild(signCell);
+                tableBody.appendChild(row);
+            });
+
+            document.getElementById("dataTable").style.display = "table";
+        }
+
         function createTooltip(event, data) {
             const tooltip = document.getElementById("tooltip");
             tooltip.style.left = `${event.pageX + 10}px`;
             tooltip.style.top = `${event.pageY + 10}px`;
             tooltip.style.display = "block";
 
-            if (data.type === "planet") {
-                tooltip.textContent = `Planet: ${data.name}\nPosition: ${data.position.toFixed(2)}° (${data.zodiac_sign})`;
-            } else if (data.type === "ascendant") {
-                tooltip.textContent = `Ascendant (AC): ${data.position.toFixed(2)}° (${data.zodiac_sign})`;
-            } else {
-                tooltip.style.display = "none";
-            }
+            tooltip.textContent = `Name: ${data.name}\nPosition: ${data.position.toFixed(2)}° (${data.zodiac_sign})`;
         }
 
         function hideTooltip() {
@@ -156,15 +194,17 @@
 
                 const chartData = mapApiData(apiData);
                 const chart = new astrochart.Chart("chartContainer", 800, 800);
+                chart.radix(chartData);
 
-                chart.on("hover", (event) => {
-                    createTooltip(event, event.detail);
+                // Attach hover events
+                const elements = document.querySelectorAll("#chartContainer [data-hover]");
+                elements.forEach((element) => {
+                    element.addEventListener("mousemove", (event) => createTooltip(event, element.dataset));
+                    element.addEventListener("mouseleave", hideTooltip);
                 });
 
-                chart.on("mouseout", hideTooltip);
-
-                chart.radix(chartData);
                 chartContainer.style.display = "block";
+                populateTable(apiData);
             } catch (error) {
                 console.error("Error fetching or rendering chart data:", error);
                 errorMessage.style.display = "block";
@@ -173,5 +213,4 @@
     </script>
 </body>
 </html>
-     
 
