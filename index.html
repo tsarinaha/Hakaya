@@ -11,17 +11,8 @@
             height: 800px;
             margin: 20px auto;
             border: 1px solid black;
+            display: none;
             position: relative;
-        }
-        #dataTable {
-            width: 80%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            text-align: right;
-        }
-        #dataTable th, #dataTable td {
-            border: 1px solid black;
-            padding: 10px;
         }
         #tooltip {
             position: absolute;
@@ -47,17 +38,6 @@
     </form>
     <div id="chartContainer"></div>
     <div id="tooltip"></div>
-    <h2>بيانات الكواكب والطالع</h2>
-    <table id="dataTable" style="display: none;">
-        <thead>
-            <tr>
-                <th>الجسم الفلكي</th>
-                <th>الدرجة</th>
-                <th>البرج</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
     <script>
         function mapApiData(apiData) {
             const planetNameMapping = {
@@ -83,7 +63,7 @@
 
             const cusps = apiData.cusps || [];
             while (cusps.length < 12) {
-                cusps.push(0);
+                cusps.push(0); // Ensure 12 cusps
             }
 
             return {
@@ -106,6 +86,31 @@
             tooltip.style.display = "none";
         }
 
+        async function renderChart(apiData) {
+            const chartContainer = document.getElementById("chartContainer");
+
+            // Render the chart
+            const chartData = mapApiData(apiData);
+            const chart = new astrochart.Chart("chartContainer", 800, 800);
+            chart.radix(chartData);
+
+            // Make the chart visible
+            chartContainer.style.display = "block";
+
+            // Attach hover events to planets and cusps
+            const svgElements = chartContainer.querySelectorAll("svg [data-name]");
+            svgElements.forEach((element) => {
+                const name = element.getAttribute("data-name");
+                const degree = element.getAttribute("data-degree");
+                const zodiac = element.getAttribute("data-zodiac");
+
+                element.addEventListener("mousemove", (event) => {
+                    createTooltip(event, `Name: ${name}, Degree: ${degree}°, Zodiac: ${zodiac}`);
+                });
+                element.addEventListener("mouseleave", hideTooltip);
+            });
+        }
+
         document.getElementById("chartForm").addEventListener("submit", async function (event) {
             event.preventDefault();
 
@@ -115,7 +120,7 @@
             const location = document.getElementById("location").value;
 
             const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
-            const chartContainer = document.getElementById("chartContainer");
+            const errorMessage = document.getElementById("errorMessage");
 
             try {
                 const requestData = { name, birth_date: birthDate, birth_time: birthTime, location };
@@ -132,30 +137,13 @@
                 const apiData = await response.json();
                 console.log("API Data:", apiData);
 
-                // Render the chart
-                const chartData = mapApiData(apiData);
-                const chart = new astrochart.Chart("chartContainer", 800, 800);
-                chart.radix(chartData);
-
-                chartContainer.style.display = "block";
-
-                // Attach hover events to SVG elements
-                const svgElements = chartContainer.querySelectorAll("svg [data-name]");
-                svgElements.forEach((element) => {
-                    const name = element.getAttribute("data-name");
-                    const degree = element.getAttribute("data-degree");
-                    const zodiac = element.getAttribute("data-zodiac");
-
-                    element.addEventListener("mousemove", (event) => {
-                        createTooltip(event, `Name: ${name}, Degree: ${degree}°, Zodiac: ${zodiac}`);
-                    });
-                    element.addEventListener("mouseleave", hideTooltip);
-                });
+                // Render the chart with hover interactivity
+                await renderChart(apiData);
             } catch (error) {
                 console.error("Error fetching or rendering chart data:", error);
+                errorMessage.style.display = "block";
             }
         });
     </script>
 </body>
 </html>
-
