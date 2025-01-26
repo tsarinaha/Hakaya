@@ -12,7 +12,6 @@
             margin: 20px auto;
             border: 1px solid black;
             display: none;
-            position: relative;
         }
         #dataTable {
             width: 80%;
@@ -24,16 +23,20 @@
             border: 1px solid black;
             padding: 10px;
         }
-        .tooltip {
-            position: absolute;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            padding: 5px;
-            border-radius: 4px;
-            font-size: 0.9em;
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-            display: none;
-            z-index: 1000;
+        h1, h2 {
+            text-align: center;
+        }
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input, button {
+            margin: 5px;
+        }
+        #errorMessage {
+            color: red;
+            text-align: center;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -48,7 +51,17 @@
     </form>
     <div id="errorMessage" style="display: none;">فشل تحميل البيانات. يرجى التحقق من الإدخال الخاص بك.</div>
     <div id="chartContainer"></div>
-    <div class="tooltip" id="chartTooltip"></div>
+    <h2>بيانات الكواكب والطالع</h2>
+    <table id="dataTable" style="display: none;">
+        <thead>
+            <tr>
+                <th>الجسم الفلكي</th>
+                <th>الدرجة</th>
+                <th>البرج</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
     <script>
         function mapApiData(apiData) {
             const planetNameMapping = {
@@ -84,44 +97,51 @@
             };
         }
 
-        function setupHover(chartContainer, planets, houses) {
-            const tooltip = document.getElementById("chartTooltip");
-            
-            chartContainer.addEventListener("mousemove", (event) => {
-                const rect = chartContainer.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
+        function populateTable(apiData) {
+            const tableBody = document.querySelector("#dataTable tbody");
+            tableBody.innerHTML = "";
 
-                const hoveredItem = detectHover(x, y, planets, houses);
+            const planets = apiData.planets || [];
+            const houses = apiData.houses || [];
 
-                if (hoveredItem) {
-                    tooltip.textContent = hoveredItem;
-                    tooltip.style.left = `${event.pageX + 10}px`;
-                    tooltip.style.top = `${event.pageY + 10}px`;
-                    tooltip.style.display = "block";
-                } else {
-                    tooltip.style.display = "none";
-                }
+            console.log("Planets for Table:", planets);
+            console.log("Houses for Table:", houses);
+
+            // Populate planets
+            planets.forEach((planet) => {
+                const row = document.createElement("tr");
+                const nameCell = document.createElement("td");
+                const degreeCell = document.createElement("td");
+                const signCell = document.createElement("td");
+
+                nameCell.textContent = planet.name;
+                degreeCell.textContent = `${planet.position.toFixed(2)}°`;
+                signCell.textContent = planet.zodiac_sign;
+
+                row.appendChild(nameCell);
+                row.appendChild(degreeCell);
+                row.appendChild(signCell);
+                tableBody.appendChild(row);
             });
-        }
 
-        function detectHover(x, y, planets, houses) {
-            const tolerance = 20; // Tolerance in pixels for detecting a "hover"
-            for (const planet of planets) {
-                const dx = Math.abs(planet.x - x);
-                const dy = Math.abs(planet.y - y);
-                if (dx <= tolerance && dy <= tolerance) {
-                    return `${planet.name}: ${planet.position.toFixed(2)}° - ${planet.zodiac_sign}`;
-                }
-            }
-            for (const house of houses) {
-                const dx = Math.abs(house.x - x);
-                const dy = Math.abs(house.y - y);
-                if (dx <= tolerance && dy <= tolerance) {
-                    return `بيت ${house.house}: ${house.degree.toFixed(2)}°`;
-                }
-            }
-            return null;
+            // Populate houses
+            houses.forEach((house) => {
+                const row = document.createElement("tr");
+                const houseCell = document.createElement("td");
+                const degreeCell = document.createElement("td");
+                const signCell = document.createElement("td");
+
+                houseCell.textContent = `بيت ${house.house}`;
+                degreeCell.textContent = `${house.degree.toFixed(2)}°`;
+                signCell.textContent = house.zodiac_sign;
+
+                row.appendChild(houseCell);
+                row.appendChild(degreeCell);
+                row.appendChild(signCell);
+                tableBody.appendChild(row);
+            });
+
+            document.getElementById("dataTable").style.display = "table";
         }
 
         document.getElementById("chartForm").addEventListener("submit", async function (event) {
@@ -157,7 +177,7 @@
 
                 chartContainer.style.display = "block";
 
-                setupHover(chartContainer, apiData.planets, apiData.houses);
+                populateTable(apiData);
             } catch (error) {
                 console.error("Error fetching or rendering chart data:", error);
                 errorMessage.style.display = "block";
