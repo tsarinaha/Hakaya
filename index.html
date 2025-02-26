@@ -6,6 +6,32 @@
     <title>الخريطة الفلكية وجدول البيوت والكواكب</title>
     <script src="https://unpkg.com/@astrodraw/astrochart"></script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input, button {
+            margin: 5px;
+        }
+
+        #errorMessage {
+            color: red;
+            text-align: center;
+            margin-top: 20px;
+        }
+
         #chartContainer {
             width: 800px;
             height: 800px;
@@ -13,106 +39,90 @@
             border: 1px solid black;
             display: none;
         }
-        #dataTable {
-            width: 80%;
+
+        /* Table Container */
+        #tableContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             margin: 20px auto;
+            max-width: 90%;
+            overflow-x: auto;
+        }
+
+        /* Table Styling */
+        #dataTable {
+            width: 100%;
+            max-width: 700px;
             border-collapse: collapse;
-            text-align: right;
+            text-align: center;
+            background-color: #f9f9f9;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
+
         #dataTable th, #dataTable td {
-            border: 1px solid black;
+            border: 1px solid #333;
             padding: 10px;
+            font-size: 16px;
         }
-        h1, h2 {
-            text-align: center;
+
+        #dataTable th {
+            background-color: #0056b3;
+            color: white;
         }
-        form {
-            text-align: center;
-            margin-bottom: 20px;
+
+        #dataTable tr:nth-child(even) {
+            background-color: #e9ecef;
         }
-        input, button {
-            margin: 5px;
-        }
-        #errorMessage {
-            color: red;
-            text-align: center;
-            margin-top: 20px;
-        }
+
         #ascendant-text {
             font-size: 18px;
             font-weight: bold;
             color: #333;
             text-align: center;
             margin-top: 10px;
-            display: none; /* Hidden by default */
+            display: none;
         }
     </style>
 </head>
 <body>
+
     <h1>الجدول الفلكي التفاعلي</h1>
+    
     <form id="chartForm">
-        <input type="text" id="name" placeholder="الاسم الكامل" required>
-        <input type="date" id="birthDate" required>
-        <input type="time" id="birthTime" required>
-        <input type="text" id="location" placeholder="مكان الولادة" required>
-        <button type="submit">احسب الخريطة الفلكية</button>
+        <input type="text" id="name" placeholder="الاسم الكامل">
+        <input type="datetime-local" id="datetime">
+        <input type="text" id="location" placeholder="الموقع">
+        <button type="button" onclick="generateChart()">إنشاء الخريطة</button>
     </form>
 
-    <p id="ascendant-text"></p>
-    <p id="errorMessage"></p>
+    <div id="errorMessage"></div>
+    <div id="ascendant-text"></div>
 
     <div id="chartContainer"></div>
 
+    <!-- Wrapped Table Inside a Container -->
+    <div id="tableContainer">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>الجسم الفلكي</th>
+                    <th>الدرجة</th>
+                    <th>البرج</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Table data will be inserted dynamically -->
+            </tbody>
+        </table>
+    </div>
+
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.getElementById("chartForm").addEventListener("submit", async function (event) {
-                event.preventDefault();
-
-                // Get input values
-                const name = document.getElementById("name").value;
-                const birthDate = document.getElementById("birthDate").value;
-                const birthTime = document.getElementById("birthTime").value;
-                const location = document.getElementById("location").value;
-
-                // Element references
-                const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
-                const errorMessage = document.getElementById("errorMessage");
-                const ascendantElement = document.getElementById("ascendant-text");
-
-                errorMessage.innerText = ""; // Clear errors
-                ascendantElement.style.display = "none"; // Hide ascendant initially
-
-                try {
-                    // Prepare API request
-                    const requestData = { name, birth_date: birthDate, birth_time: birthTime, location };
-                    const response = await fetch(apiUrl, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(requestData),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error: ${response.status}`);
-                    }
-
-                    // Get API response
-                    const apiData = await response.json();
-                    console.log("API Data:", apiData);
-
-                    // Ensure ascendant data exists
-                    if (apiData.ascendant && apiData.ascendant.text) {
-                        ascendantElement.innerText = apiData.ascendant.text;
-                        ascendantElement.style.display = "block"; // Show element
-                    } else {
-                        ascendantElement.innerText = "لم يتم العثور على برج الطالع";
-                        ascendantElement.style.display = "block";
-                    }
-                } catch (error) {
-                    console.error("Error fetching astrology data:", error);
-                    errorMessage.innerText = "حدث خطأ أثناء جلب البيانات. يرجى المحاولة مرة أخرى.";
-                }
-            });
-        });
+        function generateChart() {
+            document.getElementById("chartContainer").style.display = "block";
+            document.getElementById("ascendant-text").style.display = "block";
+        }
     </script>
+
 </body>
 </html>
