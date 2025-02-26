@@ -185,11 +185,18 @@
                 const apiData = await response.json();
                 console.log("API Data:", apiData);
                 
-                // Display the Ascendant Sign with distinct degree
-                if (apiData.ascendant && apiData.ascendant.text) {
-                    document.getElementById("ascendant-text").innerText = apiData.ascendant.text;
-                }
-
+// Display the Ascendant Sign with distinct degree
+if (apiData.ascendant && apiData.ascendant.text) {
+    const ascendantElement = document.getElementById("ascendant-text");
+    
+    if (ascendantElement) {
+        ascendantElement.innerText = apiData.ascendant.text;
+    } else {
+        console.error("Element with ID 'ascendant-text' not found in the HTML.");
+    }
+} else {
+    console.warn("Ascendant data is missing or undefined.");
+}
                 const chartData = mapApiData(apiData);
                 const chart = new astrochart.Chart("chartContainer", 800, 800);
                 chart.radix(chartData);
