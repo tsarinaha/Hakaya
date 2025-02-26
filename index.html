@@ -184,10 +184,10 @@
 
                 const apiData = await response.json();
                 console.log("API Data:", apiData);
-
-                // Display the Ascendant Sign
-                if (apiData.ascendant && apiData.ascendant.zodiac_sign) {
-                    document.getElementById("ascendant-text").innerText = `برجك الطالع هو ${apiData.ascendant.zodiac_sign}`;
+                
+                // Display the Ascendant Sign with distinct degree
+                if (apiData.ascendant && apiData.ascendant.text) {
+                    document.getElementById("ascendant-text").innerText = apiData.ascendant.text;
                 }
 
                 const chartData = mapApiData(apiData);
