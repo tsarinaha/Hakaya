@@ -183,7 +183,24 @@
 
                 const apiData = await response.json();
                 console.log("API Data:", apiData);
-                
+                // Debug: Log the ascendant data to ensure it's received
+console.log("Ascendant Data:", apiData.ascendant);
+
+// Get the Ascendant text element
+const ascendantElement = document.getElementById("ascendant-text");
+
+// Ensure the element exists before updating it
+if (ascendantElement) {
+    if (apiData.ascendant && apiData.ascendant.text) {
+        ascendantElement.innerText = apiData.ascendant.text;
+        ascendantElement.style.display = "block"; // Ensure it's visible
+    } else {
+        ascendantElement.innerText = "لم يتم العثور على برج الطالع";
+    }
+} else {
+    console.error("❌ Element with ID 'ascendant-text' not found in the HTML!");
+}
+
 // Display the Ascendant Sign with distinct degree
 if (apiData.ascendant && apiData.ascendant.text) {
     const ascendantElement = document.getElementById("ascendant-text");
