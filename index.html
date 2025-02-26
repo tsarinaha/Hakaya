@@ -153,78 +153,59 @@
                 row.appendChild(signCell);
                 tableBody.appendChild(row);
             });
+document.getElementById("chartForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-            document.getElementById("dataTable").style.display = "table";
+    const name = document.getElementById("name").value;
+    const birthDate = document.getElementById("birthDate").value;
+    const birthTime = document.getElementById("birthTime").value;
+    const location = document.getElementById("location").value;
+
+    const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
+    const errorMessage = document.getElementById("errorMessage");
+    const chartContainer = document.getElementById("chartContainer");
+    const ascendantElement = document.getElementById("ascendant-text"); // Get Ascendant element
+
+    try {
+        const requestData = { name, birth_date: birthDate, birth_time: birthTime, location };
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
         }
 
-        document.getElementById("chartForm").addEventListener("submit", async function (event) {
-            event.preventDefault();
+        const apiData = await response.json();
+        console.log("✅ API Data Received:", apiData);
+        console.log("✅ Ascendant Data:", apiData.ascendant);
 
-            const name = document.getElementById("name").value;
-            const birthDate = document.getElementById("birthDate").value;
-            const birthTime = document.getElementById("birthTime").value;
-            const location = document.getElementById("location").value;
-
-            const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
-            const errorMessage = document.getElementById("errorMessage");
-            const chartContainer = document.getElementById("chartContainer");
-
-            try {
-                const requestData = { name, birth_date: birthDate, birth_time: birthTime, location };
-                const response = await fetch(apiUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(requestData),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
-                }
-
-                const apiData = await response.json();
-                console.log("API Data:", apiData);
-                // Debug: Log the ascendant data to ensure it's received
-console.log("Ascendant Data:", apiData.ascendant);
-
-// Get the Ascendant text element
-const ascendantElement = document.getElementById("ascendant-text");
-
-// Ensure the element exists before updating it
-if (ascendantElement) {
-    if (apiData.ascendant && apiData.ascendant.text) {
-        ascendantElement.innerText = apiData.ascendant.text;
-        ascendantElement.style.display = "block"; // Ensure it's visible
-    } else {
-        ascendantElement.innerText = "لم يتم العثور على برج الطالع";
-    }
-} else {
-    console.error("❌ Element with ID 'ascendant-text' not found in the HTML!");
-}
-
-// Display the Ascendant Sign with distinct degree
-if (apiData.ascendant && apiData.ascendant.text) {
-    const ascendantElement = document.getElementById("ascendant-text");
-    
-    if (ascendantElement) {
-        ascendantElement.innerText = apiData.ascendant.text;
-    } else {
-        console.error("Element with ID 'ascendant-text' not found in the HTML.");
-    }
-} else {
-    console.warn("Ascendant data is missing or undefined.");
-}
-                const chartData = mapApiData(apiData);
-                const chart = new astrochart.Chart("chartContainer", 800, 800);
-                chart.radix(chartData);
-
-                chartContainer.style.display = "block";
-
-                populateTable(apiData);
-            } catch (error) {
-                console.error("Error fetching or rendering chart data:", error);
-                errorMessage.style.display = "block";
+        // 🔹 Ensure Ascendant element exists before updating
+        if (ascendantElement) {
+            if (apiData.ascendant && apiData.ascendant.text) {
+                ascendantElement.innerText = `✨ ${apiData.ascendant.text} ✨`;
+                ascendantElement.style.display = "block"; // Ensure visibility
+                console.log("✅ Ascendant text updated:", apiData.ascendant.text);
+            } else {
+                ascendantElement.innerText = "لم يتم العثور على برج الطالع";
+                console.warn("⚠️ Ascendant data is missing in API response.");
             }
-        });
+        } else {
+            console.error("❌ Element with ID 'ascendant-text' not found in the HTML!");
+        }
+
+        // 🔹 Generate Chart
+        const chartData = mapApiData(apiData);
+        const chart = new astrochart.Chart("chartContainer", 800, 800);
+        chart.radix(chartData);
+
+    } catch (error) {
+        console.error("❌ Error fetching or rendering chart data:", error);
+        errorMessage.style.display = "block";
+    }
+});
     </script>
 </body>
 </html>
