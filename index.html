@@ -44,7 +44,6 @@
             color: #333;
             text-align: center;
             margin-top: 10px;
-            display: none; /* Hidden by default */
         }
     </style>
 </head>
@@ -54,64 +53,154 @@
         <input type="text" id="name" placeholder="الاسم الكامل" required>
         <input type="date" id="birthDate" required>
         <input type="time" id="birthTime" required>
-        <input type="text" id="location" placeholder="مكان الولادة" required>
-        <button type="submit">احسب الخريطة الفلكية</button>
+        <input type="text" id="location" placeholder="الموقع (المدينة، الدولة)" required>
+        <button type="submit">استخرج خريطتي الفلكية</button>
     </form>
-
-    <p id="ascendant-text"></p>
-    <p id="errorMessage"></p>
-
+    
+    <div id="errorMessage" style="display: none;">فشل تحميل البيانات. يرجى التحقق من الإدخال الخاص بك.</div>
+    
+    <!-- Ascendant Display -->
+    <p id="ascendant-text"></p> 
+    
     <div id="chartContainer"></div>
-
+    
+    <h2>بيانات الكواكب والطالع</h2>
+    <table id="dataTable" style="display: none;">
+        <thead>
+            <tr>
+                <th>الجسم الفلكي</th>
+                <th>الدرجة</th>
+                <th>البرج</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.getElementById("chartForm").addEventListener("submit", async function (event) {
-                event.preventDefault();
+        function mapApiData(apiData) {
+            const planetNameMapping = {
+                "الشمس": "Sun",
+                "القمر": "Moon",
+                "عطارد": "Mercury",
+                "الزهرة": "Venus",
+                "المريخ": "Mars",
+                "المشتري": "Jupiter",
+                "زحل": "Saturn",
+                "أورانوس": "Uranus",
+                "نبتون": "Neptune",
+                "بلوتو": "Pluto",
+            };
 
-                // Get input values
-                const name = document.getElementById("name").value;
-                const birthDate = document.getElementById("birthDate").value;
-                const birthTime = document.getElementById("birthTime").value;
-                const location = document.getElementById("location").value;
-
-                // Element references
-                const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
-                const errorMessage = document.getElementById("errorMessage");
-                const ascendantElement = document.getElementById("ascendant-text");
-
-                errorMessage.innerText = ""; // Clear errors
-                ascendantElement.style.display = "none"; // Hide ascendant initially
-
-                try {
-                    // Prepare API request
-                    const requestData = { name, birth_date: birthDate, birth_time: birthTime, location };
-                    const response = await fetch(apiUrl, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(requestData),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(HTTP error: ${response.status});
-                    }
-
-                    // Get API response
-                    const apiData = await response.json();
-                    console.log("API Data:", apiData);
-
-                    // Ensure ascendant data exists
-                    if (apiData.ascendant && apiData.ascendant.text) {
-                        ascendantElement.innerText = apiData.ascendant.text;
-                        ascendantElement.style.display = "block"; // Show element
-                    } else {
-                        ascendantElement.innerText = "لم يتم العثور على برج الطالع";
-                        ascendantElement.style.display = "block";
-                    }
-                } catch (error) {
-                    console.error("Error fetching astrology data:", error);
-                    errorMessage.innerText = "حدث خطأ أثناء جلب البيانات. يرجى المحاولة مرة أخرى.";
+            const mappedPlanets = {};
+            for (const planet of apiData.planets || []) {
+                const englishName = planetNameMapping[planet.name];
+                if (englishName && !isNaN(planet.position)) {
+                    mappedPlanets[englishName] = [planet.position];
                 }
+            }
+
+            const cusps = apiData.cusps || [];
+            while (cusps.length < 12) {
+                cusps.push(0); // Ensure 12 cusps
+            }
+
+            return {
+                planets: mappedPlanets,
+                cusps: cusps.slice(0, 12),
+                aspects: apiData.aspects || [],
+            };
+        }
+
+        function populateTable(apiData) {
+            const tableBody = document.querySelector("#dataTable tbody");
+            tableBody.innerHTML = "";
+
+            const planets = apiData.planets || [];
+            const houses = apiData.houses || [];
+
+            console.log("Planets for Table:", planets);
+            console.log("Houses for Table:", houses);
+
+            // Populate planets
+            planets.forEach((planet) => {
+                const row = document.createElement("tr");
+                const nameCell = document.createElement("td");
+                const degreeCell = document.createElement("td");
+                const signCell = document.createElement("td");
+
+                nameCell.textContent = planet.name;
+                degreeCell.textContent = `${planet.position.toFixed(2)}°`;
+                signCell.textContent = planet.zodiac_sign;
+
+                row.appendChild(nameCell);
+                row.appendChild(degreeCell);
+                row.appendChild(signCell);
+                tableBody.appendChild(row);
             });
+
+            // Populate houses
+            houses.forEach((house) => {
+                const row = document.createElement("tr");
+                const houseCell = document.createElement("td");
+                const degreeCell = document.createElement("td");
+                const signCell = document.createElement("td");
+
+                houseCell.textContent = `بيت ${house.house}`;
+                degreeCell.textContent = `${house.degree.toFixed(2)}°`;
+                signCell.textContent = house.zodiac_sign;
+
+                row.appendChild(houseCell);
+                row.appendChild(degreeCell);
+                row.appendChild(signCell);
+                tableBody.appendChild(row);
+            });
+
+            document.getElementById("dataTable").style.display = "table";
+        }
+
+        document.getElementById("chartForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const birthDate = document.getElementById("birthDate").value;
+            const birthTime = document.getElementById("birthTime").value;
+            const location = document.getElementById("location").value;
+
+            const apiUrl = "https://astrologychartapi.onrender.com/calculate_chart";
+            const errorMessage = document.getElementById("errorMessage");
+            const chartContainer = document.getElementById("chartContainer");
+
+            try {
+                const requestData = { name, birth_date: birthDate, birth_time: birthTime, location };
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(requestData),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+
+                const apiData = await response.json();
+                console.log("API Data:", apiData);
+
+                // Display the Ascendant Sign
+                if (apiData.ascendant && apiData.ascendant.zodiac_sign) {
+                    document.getElementById("ascendant-text").innerText = `برجك الطالع هو ${apiData.ascendant.zodiac_sign}`;
+                }
+
+                const chartData = mapApiData(apiData);
+                const chart = new astrochart.Chart("chartContainer", 800, 800);
+                chart.radix(chartData);
+
+                chartContainer.style.display = "block";
+
+                populateTable(apiData);
+            } catch (error) {
+                console.error("Error fetching or rendering chart data:", error);
+                errorMessage.style.display = "block";
+            }
         });
     </script>
 </body>
